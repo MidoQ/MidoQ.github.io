@@ -46,15 +46,15 @@
   };
 </script>
 
-  <meta name="description" content="彻底理解Python中的闭包和装饰器（上）这是我的第3篇博客。 终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。 本篇首先讲闭包。">
+  <meta name="description" content="这是我的第3篇博客。 终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。 本篇首先讲闭包。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="彻底理解Python中的闭包和装饰器（上）">
 <meta property="og:url" content="https://midoq.github.io/2020/02/04/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8A%EF%BC%89/index.html">
 <meta property="og:site_name" content="MidoQ的小站">
-<meta property="og:description" content="彻底理解Python中的闭包和装饰器（上）这是我的第3篇博客。 终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。 本篇首先讲闭包。">
+<meta property="og:description" content="这是我的第3篇博客。 终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。 本篇首先讲闭包。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-02-04T09:41:43.000Z">
-<meta property="article:modified_time" content="2020-02-05T05:45:43.784Z">
+<meta property="article:modified_time" content="2020-02-05T14:03:00.959Z">
 <meta property="article:author" content="QMF">
 <meta property="article:tag" content="语言">
 <meta property="article:tag" content="Python">
@@ -202,7 +202,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-05 13:45:43" itemprop="dateModified" datetime="2020-02-05T13:45:43+08:00">2020-02-05</time>
+                <time title="修改时间：2020-02-05 22:03:00" itemprop="dateModified" datetime="2020-02-05T22:03:00+08:00">2020-02-05</time>
               </span>
 
           
@@ -216,7 +216,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="彻底理解Python中的闭包和装饰器（上）"><a href="#彻底理解Python中的闭包和装饰器（上）" class="headerlink" title="彻底理解Python中的闭包和装饰器（上）"></a>彻底理解Python中的闭包和装饰器（上）</h1><p>这是我的第<b>3</b>篇博客。</p>
+        <p>这是我的第<b>3</b>篇博客。</p>
 <p>终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。</p>
 <p>本篇首先讲闭包。</p>
 <a id="more"></a>
@@ -255,7 +255,10 @@
 <p>上面的两句代码，实际上通过函数指针f执行了内函数inner()。执行上面的所有代码，输出为：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_sum &#x3D; 12</span><br><span class="line">x &#x3D; 12</span><br></pre></td></tr></table></figure>
 
-<p>再次强调，<b>直到使用函数指针调用内函数，内函数才会被执行。</b></p>
+<p>再次强调：</p>
+<blockquote>
+<p>直到使用函数指针调用内函数，内函数才会被执行。</p>
+</blockquote>
 <p>需要说明，虽然在闭包中定义的局部变量常驻内存中，但在闭包外这些变量仍然是不可访问的。如上面的temp变量，只有通过函数指针f才可以访问，在函数外引用该变量会报错变量不存在。这与C++中的静态变量相同，即生命期比局部变量长，但可见性与局部变量相同。</p>
 <h3 id="修改闭包的局部变量"><a href="#修改闭包的局部变量" class="headerlink" title="修改闭包的局部变量"></a>修改闭包的局部变量</h3><p>外函数中的局部变量虽然在内函数中可以引用（使用），但不能够重新赋值。</p>
 <p>执行如下闭包函数：</p>
@@ -400,7 +403,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#彻底理解Python中的闭包和装饰器（上）"><span class="nav-number">1.</span> <span class="nav-text">彻底理解Python中的闭包和装饰器（上）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是闭包"><span class="nav-number">1.1.</span> <span class="nav-text">什么是闭包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python中闭包的定义和使用"><span class="nav-number">1.2.</span> <span class="nav-text">Python中闭包的定义和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#闭包代码分析"><span class="nav-number">1.2.1.</span> <span class="nav-text">闭包代码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改闭包的局部变量"><span class="nav-number">1.2.2.</span> <span class="nav-text">修改闭包的局部变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#闭包的参数"><span class="nav-number">1.2.3.</span> <span class="nav-text">闭包的参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#闭包陷阱"><span class="nav-number">1.3.</span> <span class="nav-text">闭包陷阱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">1.4.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是闭包"><span class="nav-number">1.</span> <span class="nav-text">什么是闭包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python中闭包的定义和使用"><span class="nav-number">2.</span> <span class="nav-text">Python中闭包的定义和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#闭包代码分析"><span class="nav-number">2.1.</span> <span class="nav-text">闭包代码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改闭包的局部变量"><span class="nav-number">2.2.</span> <span class="nav-text">修改闭包的局部变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#闭包的参数"><span class="nav-number">2.3.</span> <span class="nav-text">闭包的参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#闭包陷阱"><span class="nav-number">3.</span> <span class="nav-text">闭包陷阱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
