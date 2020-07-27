@@ -56,7 +56,7 @@
 <meta property="og:image" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/k8s.png">
 <meta property="og:image" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/pod.png">
 <meta property="article:published_time" content="2020-07-26T09:49:09.000Z">
-<meta property="article:modified_time" content="2020-07-27T14:42:02.919Z">
+<meta property="article:modified_time" content="2020-07-27T14:59:51.315Z">
 <meta property="article:author" content="MidoQ">
 <meta property="article:tag" content="云计算">
 <meta property="article:tag" content="Kubernetes">
@@ -265,7 +265,7 @@
 <p>你可以通过Kubernetes官网的这张图来了解其整体结构：</p>
 <img src="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/k8s.png" class="">
 
-<p>读者可以通过阅读笔者的上一篇博客<a href="[https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%E2%80%94%E2%80%94%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/#more](https://midoq.github.io/2020/07/25/Kubernetes单机创建MySQL-Tomcat演示程序——《Kubernetes权威指南》第一章demo报错踩坑/#more)">《Kubernetes单机创建MySQL-Tomcat演示程序》</a>，动手实践来了解整个Kubernetes到底是如何运转的。</p>
+<p>读者可以通过阅读笔者的上一篇博客<a href="https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%E2%80%94%E2%80%94%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/">《Kubernetes单机创建MySQL-Tomcat演示程序》</a>，动手实践来了解整个Kubernetes到底是如何运转的。</p>
 <h3 id="Kubernetes关键概念"><a href="#Kubernetes关键概念" class="headerlink" title="Kubernetes关键概念"></a>Kubernetes关键概念</h3><p>或许上一节的一些术语还让读者非常疑惑，现在我们一起来具体看看一些重要概念的意思。</p>
 <h4 id="集群和节点"><a href="#集群和节点" class="headerlink" title="集群和节点"></a>集群和节点</h4><p>一个集群就是数台运行着应用程序的服务器，每台服务器被称为一个节点，至少3个节点才可以称得上是一个集群。</p>
 <p>节点可以是物理机，也可以是虚拟机（传统意义上的），只要能够运行docker和Kubernetes服务。</p>
