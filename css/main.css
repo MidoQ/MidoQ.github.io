@@ -932,7 +932,7 @@ pre .javascript .function {
 }
 .header-inner {
   margin: 0 auto;
-  position: relative;
+  position: fixed;
   width: calc(100% - 20px);
 }
 @media (min-width: 1200px) {
@@ -1155,7 +1155,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #0eff4f;
+  background: #ffebff;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
