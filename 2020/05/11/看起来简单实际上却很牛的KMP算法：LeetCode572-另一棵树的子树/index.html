@@ -48,22 +48,22 @@
 
   <meta name="description" content="题目描述给定两个非空二叉树 s 和 t，检验 s 中是否包含和 t 具有相同结构和节点值的子树。s 的一个子树包括 s 的一个节点和这个节点的所有子孙。s 也可以看做它自身的一棵子树。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LeetCode - 572另一个树的子树">
-<meta property="og:url" content="https://midoq.github.io/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/index.html">
+<meta property="og:title" content="看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树">
+<meta property="og:url" content="https://midoq.github.io/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/index.html">
 <meta property="og:site_name" content="TARDIS">
 <meta property="og:description" content="题目描述给定两个非空二叉树 s 和 t，检验 s 中是否包含和 t 具有相同结构和节点值的子树。s 的一个子树包括 s 的一个节点和这个节点的所有子孙。s 也可以看做它自身的一棵子树。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://midoq.github.io/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91-01.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200933.png">
 <meta property="article:published_time" content="2020-05-11T03:39:27.000Z">
-<meta property="article:modified_time" content="2020-05-11T05:03:49.779Z">
+<meta property="article:modified_time" content="2021-01-27T12:54:20.688Z">
 <meta property="article:author" content="MidoQ">
-<meta property="article:tag" content="leetcode">
 <meta property="article:tag" content="算法">
 <meta property="article:tag" content="字符串">
+<meta property="article:tag" content="LeetCode">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://midoq.github.io/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91-01.png">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200933.png">
 
-<link rel="canonical" href="https://midoq.github.io/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/">
+<link rel="canonical" href="https://midoq.github.io/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/">
 
 
 <script id="page-configurations">
@@ -75,7 +75,7 @@
   };
 </script>
 
-  <title>LeetCode - 572另一个树的子树 | TARDIS</title>
+  <title>看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树 | TARDIS</title>
   
 
 
@@ -187,7 +187,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar-qmf.png">
@@ -200,7 +200,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          LeetCode - 572另一个树的子树
+          看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树
         </h2>
 
         <div class="post-meta">
@@ -229,8 +229,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/#comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/" itemprop="commentCount"></span>
+    <a title="valine" href="/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -248,8 +248,7 @@
         <h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>给定两个非空二叉树 s 和 t，检验 s 中是否包含和 t 具有相同结构和节点值的子树。s 的一个子树包括 s 的一个节点和这个节点的所有子孙。s 也可以看做它自身的一棵子树。</p>
 <a id="more"></a>
 
-<img src="/2020/05/11/LeetCode%20-%20572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/572%E5%8F%A6%E4%B8%80%E4%B8%AA%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91-01.png" class="">
-
+<p><img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200933.png" alt="572另一个树的子树-01"></p>
 <h2 id="暴力解法"><a href="#暴力解法" class="headerlink" title="暴力解法"></a>暴力解法</h2><p>从s的根节点开始遍历，查看该节点下的子树是否与t相同。方法是同步对s和t进行遍历，一旦出现s和t有不同（包括只有其中一个为NULL，或都不为NULL时value不同），就返回为false。如果最终返回给调用比较函数的地方是false，那么就继续为s的下一个节点重新遍历。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isSameTree</span><span class="params">(TreeNode * sNow, TreeNode * tNow)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!sNow &amp;&amp; !tNow) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span>((!sNow &amp;&amp; tNow) || (sNow &amp;&amp; !tNow) || (sNow-&gt;val != tNow-&gt;val)) </span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        <span class="comment">//这里直接返回的是：当左子树和右子树全部相等时，就是匹配的。</span></span><br><span class="line">        <span class="comment">//为什么没有比较本节点？因为假如本节点value不一样，就已经在上面一个if被返回false了，不会执行到最后的return</span></span><br><span class="line">        <span class="keyword">return</span> isSameTree(sNow-&gt;left, tNow-&gt;left) &amp;&amp; isSameTree(sNow-&gt;right, tNow-&gt;right);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">dfs</span><span class="params">(TreeNode * sNow, TreeNode * tNow)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!sNow) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        <span class="comment">//由于||和&amp;&amp;的短路特性，||后面的表达式只有前面为false才会被运行</span></span><br><span class="line">        <span class="keyword">return</span> isSameTree(sNow, tNow) || dfs(sNow-&gt;left, tNow) || dfs(sNow-&gt;right, tNow);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isSubtree</span><span class="params">(TreeNode* s, TreeNode* t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">bool</span> isSub = dfs(s, t);</span><br><span class="line">        <span class="keyword">return</span> isSub;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
@@ -279,9 +278,9 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/leetcode/" rel="tag"># leetcode</a>
               <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
               <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/" rel="tag"># 字符串</a>
+              <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
           </div>
 
         
@@ -290,12 +289,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/03/01/%E4%B8%80%E8%B5%B7%E5%AD%A6%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%881%EF%BC%89%EF%BC%9A%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%E3%80%81%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%E3%80%81%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/" rel="prev" title="一起学数据结构(1) - 三种基本排序方法之选择排序/冒泡排序/插入排序">
-      <i class="fa fa-chevron-left"></i> 一起学数据结构(1) - 三种基本排序方法之选择排序/冒泡排序/插入排序
+    <a href="/2020/03/01/%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%20%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%20%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/" rel="prev" title="三种基本排序方法之选择排序 冒泡排序 插入排序">
+      <i class="fa fa-chevron-left"></i> 三种基本排序方法之选择排序 冒泡排序 插入排序
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%E2%80%94%E2%80%94%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/" rel="next" title="Kubernetes单机创建MySQL+Tomcat演示程序 ——《Kubernetes权威指南》第一章demo报错踩坑">
-      Kubernetes单机创建MySQL+Tomcat演示程序 ——《Kubernetes权威指南》第一章demo报错踩坑 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/" rel="next" title="Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑">
+      Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -380,13 +379,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

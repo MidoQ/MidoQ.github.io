@@ -48,22 +48,22 @@
 
   <meta name="description" content="Kubernetes简介Kubernetes简称K8S（因为k和s中间有8个字母），是一个开源的容器集群管理平台，基于Go语言编写。 使用K8S，将简化分布式系统上的容器应用部署，使得开发人员可以专注于业务软件，而非较为底层的负载均衡、服务监控等。因此，可以认为它是介于操作系统软件和应用软件之间的”中间件“。K8S具有强大的自动化机制，降低了系统后期的运维难度。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="进击的K8S(一)-Kubernetes基础概念(上)">
-<meta property="og:url" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/index.html">
+<meta property="og:title" content="进击的K8S：Kubernetes基础概念">
+<meta property="og:url" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/index.html">
 <meta property="og:site_name" content="TARDIS">
 <meta property="og:description" content="Kubernetes简介Kubernetes简称K8S（因为k和s中间有8个字母），是一个开源的容器集群管理平台，基于Go语言编写。 使用K8S，将简化分布式系统上的容器应用部署，使得开发人员可以专注于业务软件，而非较为底层的负载均衡、服务监控等。因此，可以认为它是介于操作系统软件和应用软件之间的”中间件“。K8S具有强大的自动化机制，降低了系统后期的运维难度。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/k8s.png">
-<meta property="og:image" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/pod.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200334.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200444.png">
 <meta property="article:published_time" content="2020-07-26T09:49:09.000Z">
-<meta property="article:modified_time" content="2020-07-27T14:59:51.315Z">
+<meta property="article:modified_time" content="2021-01-27T12:54:53.353Z">
 <meta property="article:author" content="MidoQ">
 <meta property="article:tag" content="云计算">
 <meta property="article:tag" content="Kubernetes">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/k8s.png">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200334.png">
 
-<link rel="canonical" href="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/">
+<link rel="canonical" href="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
 
 
 <script id="page-configurations">
@@ -75,7 +75,7 @@
   };
 </script>
 
-  <title>进击的K8S(一)-Kubernetes基础概念(上) | TARDIS</title>
+  <title>进击的K8S：Kubernetes基础概念 | TARDIS</title>
   
 
 
@@ -187,7 +187,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar-qmf.png">
@@ -200,7 +200,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          进击的K8S(一)-Kubernetes基础概念(上)
+          进击的K8S：Kubernetes基础概念
         </h2>
 
         <div class="post-meta">
@@ -240,8 +240,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/#comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/" itemprop="commentCount"></span>
+    <a title="valine" href="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -277,8 +277,7 @@
 <li>kube-proxy：Kubernetes集群内有大量的容器和服务，它们通过TCP相互通信，kube-proxy就负责解决通信的问题。</li>
 </ul>
 <p>你可以通过Kubernetes官网的这张图来了解其整体结构：</p>
-<img src="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/k8s.png" class="">
-
+<p><img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200334.png" alt="k8s"></p>
 <p>读者可以通过阅读笔者的上一篇博客<a href="https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%E2%80%94%E2%80%94%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/">《Kubernetes单机创建MySQL-Tomcat演示程序》</a>，动手实践来了解整个Kubernetes到底是如何运转的。</p>
 <h3 id="Kubernetes关键概念"><a href="#Kubernetes关键概念" class="headerlink" title="Kubernetes关键概念"></a>Kubernetes关键概念</h3><p>或许上一节的一些术语还让读者非常疑惑，现在我们一起来具体看看一些重要概念的意思。</p>
 <h4 id="集群和节点"><a href="#集群和节点" class="headerlink" title="集群和节点"></a>集群和节点</h4><p>一个集群就是数台运行着应用程序的服务器，每台服务器被称为一个节点，至少3个节点才可以称得上是一个集群。</p>
@@ -321,8 +320,7 @@
 <p>从上面也可以看出，一个Name在同一时间只能被一个对象拥有。如果对象被删除，可以使用相同的Name创建新的对象。</p>
 <p>UID则完全是由Kubernetes生成的。在Kubernetes集群的整个生命周期内，每个对象都拥有不同的UID。也就是说，不仅同一时刻所有的对象UID都不同，而且即便某个对象被删除后重新创建，也会拥有不同的UID。</p>
 <h4 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h4><p>Pod可以说是Kubernetes中最重要的对象，它是Kubernetes中的最小部署单元。Pod通常由一组容器构成，包括一个根容器，和其他一些共同完成业务功能的容器。如下图所示：</p>
-<img src="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S(%E4%B8%80)-Kubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5(%E4%B8%8A)/pod.png" class="">
-
+<p><img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127200444.png" alt="pod"></p>
 <p>为什么不以容器本身作为管理的单元，而是又抽象出Pod？原因主要有以下几点：</p>
 <ul>
 <li>一项业务功能通常是由好几个应用程序共同完成的，需要作为一个整体。但单个业务容器异常不能代表业务整体挂掉，难以判断一项业务是否正常进行。抽象为Pod之后，用根容器的状态代表整个Pod的状态解决了这个问题。</li>
@@ -343,8 +341,6 @@
 <p>考虑一个图片处理的后台应用，它有3个副本。这些副本是可以互相代替的，也就是访问谁的效果都是一样的，甚至可能挂掉重启。前端不应该也没必要关心到底调用哪个副本，Service定义的统一入口实现了前后端的解耦。</p>
 <p>Pod的IP会随着Pod本身的销毁和创建发生变化。与此相反，每个Service创建时都会被分配一个全局唯一的虚拟IP地址，称为Cluster-IP。在Service的整个生命周期内，该Cluster-IP不会发生变化。客户端实际上访问的是Service，并且我们还希望客户端能够通过名称去访问。</p>
 <p>“通过名称而不是地址去访问”，这句话让读者有何联想？没错，就是DNS。用Service的Name与Service的Cluster-IP做一个DNS域名映射，这就是Kubernetes的服务发现机制。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以上内容对Kubernetes做了简单的介绍，包括一些最核心的概念，希望读者阅读之后能够对Kubernetes有初步的认知（笔者自己也是边学边写）。</p>
-<p>限于篇幅，一些更细节的概念还没有涉及，将在下篇中继续讲述。</p>
 <blockquote>
 <p>参考资料：</p>
 <p>《Kubernetes权威指南》（龚正等著）</p>
@@ -437,7 +433,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes简介"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes概貌认知"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes概貌认知</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么需要Kubernetes"><span class="nav-number">2.1.</span> <span class="nav-text">为什么需要Kubernetes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kubernetes的服务组成"><span class="nav-number">2.2.</span> <span class="nav-text">Kubernetes的服务组成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes关键概念"><span class="nav-number">3.</span> <span class="nav-text">Kubernetes关键概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#集群和节点"><span class="nav-number">3.1.</span> <span class="nav-text">集群和节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对象"><span class="nav-number">3.2.</span> <span class="nav-text">对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Name和UID"><span class="nav-number">3.3.</span> <span class="nav-text">Name和UID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pod"><span class="nav-number">3.4.</span> <span class="nav-text">Pod</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Pod的两种类型"><span class="nav-number">3.4.1.</span> <span class="nav-text">Pod的两种类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Pod的资源限额"><span class="nav-number">3.4.2.</span> <span class="nav-text">Pod的资源限额</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Service"><span class="nav-number">3.5.</span> <span class="nav-text">Service</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes简介"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes概貌认知"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes概貌认知</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么需要Kubernetes"><span class="nav-number">2.1.</span> <span class="nav-text">为什么需要Kubernetes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kubernetes的服务组成"><span class="nav-number">2.2.</span> <span class="nav-text">Kubernetes的服务组成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes关键概念"><span class="nav-number">3.</span> <span class="nav-text">Kubernetes关键概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#集群和节点"><span class="nav-number">3.1.</span> <span class="nav-text">集群和节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对象"><span class="nav-number">3.2.</span> <span class="nav-text">对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Name和UID"><span class="nav-number">3.3.</span> <span class="nav-text">Name和UID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pod"><span class="nav-number">3.4.</span> <span class="nav-text">Pod</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Pod的两种类型"><span class="nav-number">3.4.1.</span> <span class="nav-text">Pod的两种类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Pod的资源限额"><span class="nav-number">3.4.2.</span> <span class="nav-text">Pod的资源限额</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Service"><span class="nav-number">3.5.</span> <span class="nav-text">Service</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -460,13 +456,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
