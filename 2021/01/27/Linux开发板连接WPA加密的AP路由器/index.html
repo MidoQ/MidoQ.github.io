@@ -57,11 +57,11 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110934.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110823.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110820.png">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110811.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127142631.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110750.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110801.png">
 <meta property="article:published_time" content="2021-01-27T03:12:53.000Z">
-<meta property="article:modified_time" content="2021-01-27T03:18:49.539Z">
+<meta property="article:modified_time" content="2021-01-27T06:27:11.630Z">
 <meta property="article:author" content="MidoQ">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="嵌入式">
@@ -301,7 +301,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; add_network</span><br><span class="line">0</span><br><span class="line">&gt; list_network</span><br><span class="line">network id &#x2F; ssid &#x2F; bssid &#x2F; flags</span><br><span class="line">0		any	[DISABLED]</span><br></pre></td></tr></table></figure>
 
 <p><strong>4. 设定SSID和密码</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; set_network 0 ssid &quot;HONOR315&quot;</span><br><span class="line">OK</span><br><span class="line">&gt; set_network 0 psk &quot;315honor&quot;</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; set_network 0 ssid &quot;HONOR315&quot;</span><br><span class="line">OK</span><br><span class="line">&gt; set_network 0 psk &quot;12345678&quot;</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
 
 <p><strong>5. 使能网络连接</strong></p>
 <p>使用<code>enable_network</code>命令使能网络连接，出现<code>CTRL-EVENT-CONNECTED</code>表示已经连接完毕。</p>
@@ -322,7 +322,8 @@
 <p>查看配置文件，已经发生变化：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;etc&#x2F;wpa_supplicant.conf</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110811.png" alt="image-20210104143508892"></p>
+<img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127142631.png" alt="image-20210127142631483" style="zoom:80%;" />
+
 <p><strong>7. 网卡连通测试</strong></p>
 <p>电脑ping开发板：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110750.png" alt="image-20210104143620004"></p>
@@ -330,7 +331,7 @@
 <p><img src="https://cdn.jsdelivr.net/gh/MidoQ/MidoQ-Image-Host/images/20210127110801.png" alt="image-20210104143707464"></p>
 <h2 id="加入开机自启动"><a href="#加入开机自启动" class="headerlink" title="加入开机自启动"></a>加入开机自启动</h2><p>经过以上配置，只要<code>wlan0</code>网卡启动，且AP在信号范围内，就会自动进行连接。</p>
 <p>如果有多个AP，可以在<code>wpa_supplicant.conf</code>中添加优先级：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ctrl_interface&#x3D;&#x2F;var&#x2F;run&#x2F;wpa_supplicant</span><br><span class="line">update_config&#x3D;1</span><br><span class="line"></span><br><span class="line">network&#x3D;&#123;</span><br><span class="line">	ssid&#x3D;&quot;CNV315&quot;</span><br><span class="line">	psk&#x3D;&quot;315honor&quot;</span><br><span class="line">	priority&#x3D;2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ctrl_interface&#x3D;&#x2F;var&#x2F;run&#x2F;wpa_supplicant</span><br><span class="line">update_config&#x3D;1</span><br><span class="line"></span><br><span class="line">network&#x3D;&#123;</span><br><span class="line">	ssid&#x3D;&quot;CNV315&quot;</span><br><span class="line">	psk&#x3D;&quot;12345678&quot;</span><br><span class="line">	priority&#x3D;2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>不过，这样仍然需要手动启动网卡和wpa_supplicant，需要输入2条命令。因此，将命令加入开机加载的脚本，以便开机自启动。</p>
 <p>编辑<code>/etc/rc.local</code>，在文件末尾添加以下内容：</p>
