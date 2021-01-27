@@ -1155,7 +1155,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #ffe27f;
+  background: #700b8e;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2145,7 +2145,7 @@ ul.breadcrumb li + li:last-child {
   color: #2b53d9 !important;
 }
 body {
-  background: url("/images/bg-grad.gif");
+  background: #7cdafe;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: 50% 50%;
