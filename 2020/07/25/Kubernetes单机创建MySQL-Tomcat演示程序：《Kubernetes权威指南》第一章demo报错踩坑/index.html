@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-qmf.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-qmf.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-qmf.png">
+  <link rel="mask-icon" href="/images/logo-qmf.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"midoq.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"buttons","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="引言最近做边缘计算项目，因为没有基础，所以首先学习Kubernetes。感觉系统的中文入门资料比较少，只找到《Kubernetes权威指南》（龚正、吴治辉等著，下称《指南》），照着第一章的demo教程编写，前前后后遇到不少问题（笔者可是连MySQL都没有学过啊！），也是找了好多资料才解决。所以从头写一下如何配置一个单机版MySQL+Tomcat的demo，希望能给陷入同样困境的同学一点帮助。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑">
+<meta property="og:url" content="https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/index.html">
+<meta property="og:site_name" content="TARDIS">
+<meta property="og:description" content="引言最近做边缘计算项目，因为没有基础，所以首先学习Kubernetes。感觉系统的中文入门资料比较少，只找到《Kubernetes权威指南》（龚正、吴治辉等著，下称《指南》），照着第一章的demo教程编写，前前后后遇到不少问题（笔者可是连MySQL都没有学过啊！），也是找了好多资料才解决。所以从头写一下如何配置一个单机版MySQL+Tomcat的demo，希望能给陷入同样困境的同学一点帮助。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200606.png">
+<meta property="article:published_time" content="2020-07-24T17:16:15.000Z">
+<meta property="article:modified_time" content="2022-11-17T14:51:04.000Z">
+<meta property="article:author" content="MidoQ">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="云计算">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200606.png">
+
+<link rel="canonical" href="https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑 | TARDIS</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TARDIS</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">知识时光机</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签集合</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间线旅行</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar-qmf.png">
+      <meta itemprop="name" content="MidoQ">
+      <meta itemprop="description" content="钱缪峰的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TARDIS">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-25 01:16:15" itemprop="dateCreated datePublished" datetime="2020-07-25T01:16:15+08:00">2020-07-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">云计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>最近做边缘计算项目，因为没有基础，所以首先学习Kubernetes。感觉系统的中文入门资料比较少，只找到《Kubernetes权威指南》（龚正、吴治辉等著，下称《指南》），照着第一章的demo教程编写，前前后后遇到不少问题（笔者可是连MySQL都没有学过啊！），也是找了好多资料才解决。所以从头写一下如何配置一个单机版MySQL+Tomcat的demo，希望能给陷入同样困境的同学一点帮助。</p>
+<span id="more"></span>
+
+<p>文章较长，如果你已经按照《指南》的demo走了一遍，但是遇到了问题，可以直接看最后的“坑点总结”中的解决方案能否解决你的问题。</p>
+<h3 id="知识准备和环境准备"><a href="#知识准备和环境准备" class="headerlink" title="知识准备和环境准备"></a>知识准备和环境准备</h3><p><strong>前导知识</strong></p>
+<p>本着对零基础的同学友好的态度（尤其是像笔者这样的非科班生555），前排提示阅读本文前你至少需要以下知识：</p>
+<ol>
+<li>掌握虚拟机的使用，尤其是网络的配置</li>
+<li>Linux的使用，尤其是CentOS 7的systemctl功能</li>
+<li>了解如何更换软件安装源（主要是yum和docker）</li>
+<li>了解docker和容器的基本概念</li>
+<li>大致了解yaml</li>
+<li>可能的科学上网方法（但一般可以通过更换软件源代替）</li>
+</ol>
+<p>也就是说，以上的知识本文不会详细展开。如果其中有读者从来没有听说过的概念，最好先学习一下。</p>
+<p><strong>实验环境</strong></p>
+<p>笔者的实验环境：</p>
+<p>Win10 + VMWare14中安装CentOS 7（带GUI），桥接模式上网</p>
+<p>之所以强调是CentOS 7（包括RHEL 7），是因为它的系统服务配置使用的是systemctl命令，这可能与其他CentOS版本或Linux发行版有所不同。当然，如果你对Linux的系统服务配置有经验，可以不采用和笔者相同的版本。</p>
+<p>另外，下面所有操作最好在root下进行，避免出现权限不足的问题。</p>
+<h3 id="Kubernetes安装和配置"><a href="#Kubernetes安装和配置" class="headerlink" title="Kubernetes安装和配置"></a>Kubernetes安装和配置</h3><p>基本上按照《指南》中的环境准备如下：</p>
+<h4 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h4><p>终端输入以下命令关闭防火墙：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">disable</span> firewalld  <span class="comment">#禁止防火墙开机启动</span></span><br><span class="line">systemctl stop firewalld     <span class="comment">#关闭防火墙服务</span></span><br></pre></td></tr></table></figure>
+
+<p>如果tab之后有后缀.service是一样的，不带后缀的是简称。</p>
+<p>可以使用下面的命令查看防火墙是否已经关闭，如果是inactive表明已关闭：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status firewalld</span><br></pre></td></tr></table></figure>
+
+<p>当然，生产环境需要自己配置端口访问控制，不能完全关闭防火墙。这里因为是较安全的内网，学习和测试用，直接关闭比较方便。</p>
+<h4 id="安装etcd和Kubernetes"><a href="#安装etcd和Kubernetes" class="headerlink" title="安装etcd和Kubernetes"></a>安装etcd和Kubernetes</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y etcd kubernetes</span><br></pre></td></tr></table></figure>
+
+<p>kubernetes的每个组件有各自的配置文件，可以自定义。而该命令会执行默认配置的安装，对kubernetes尚不了解时一键安装非常方便。</p>
+<p>如果安装缓慢，可以尝试更换国内的yum安装源，或者代理上网（虚拟机可以共享物理机的代理端口，SSR和clash软件都有允许局域网共享的功能）。</p>
+<h4 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h4><p>此处需要修改两处配置文件。</p>
+<ul>
+<li>Docker配置文件</li>
+</ul>
+<p>Docker配置文件为&#x2F;etc&#x2F;sysconfig&#x2F;docker，将OPTIONS的内容设置为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPTIONS=&#x27;--selinux-enabled=false --insecure-registry gcr.io&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>可以注释OPTIONS所在行，而非删除它，以留出容错空间^ω^。</p>
+<ul>
+<li>Kubernetes apiserver配置文件</li>
+</ul>
+<p>Kubernetes apiserver配置文件为&#x2F;etc&#x2F;kubernetes&#x2F;apiserver，将–admission_control参数中的ServiceAccount删除（同样地，可以注释原行，复制一行来修改）。也就是更改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KUBE_ADMISSION_CONTROL=&quot;--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota&quot;</span><br></pre></td></tr></table></figure>
+
+<p>也许你的–admission_control参数并不是在KUBE_ADMISSION_CONTROL变量下，但是在哪里其实是一样的，只要之后的变量读取都有录入即可（不细讲，笔者也尚未完全学习），这里只需要删除。</p>
+<h4 id="启动kubernetes服务"><a href="#启动kubernetes服务" class="headerlink" title="启动kubernetes服务"></a>启动kubernetes服务</h4><p>按顺序启动以下服务：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">systemctl start etcd</span><br><span class="line">systemctl start docker</span><br><span class="line">systemctl start kube-apiserver</span><br><span class="line">systemctl start kube-controller-manager</span><br><span class="line">systemctl start kube-scheduler</span><br><span class="line">systemctl start kubelet</span><br><span class="line">systemctl start kube-proxy</span><br></pre></td></tr></table></figure>
+
+<p>至于为什么要按顺序，笔者认为是因为后面的服务对前面的有依赖，启动顺序不对可能会导致某些意外错误。</p>
+<p>这里有一个坑点，就是kube-apiserver启动时必须要开启网络连接，否则会报错：</p>
+<p>Job for kube-apiserver.service failed because the control process exited with error code. See “systemctl status kube-apiserver.service” and “journalctl -xe” for details.</p>
+<p>因为笔者系统是带GUI的，直接在右上角设置网络连接即可。如果是纯字符界面可能需要自己开启网络服务。</p>
+<p>另外，将start选项改为stop和restart分别是停止服务和重启服务，改为enable表示加入开机启动列表。</p>
+<p><strong>一键启动脚本</strong></p>
+<p>因为是学习阶段，出现各种错误老是需要开开关关，所以写了一个一键启动的脚本。</p>
+<p>创建service-list.txt文件，按顺序写上所有需要启动的服务名称：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">etcd</span><br><span class="line">docker</span><br><span class="line">kube-apiserver</span><br><span class="line">kube-controller-manager</span><br><span class="line">kube-scheduler</span><br><span class="line">kubelet</span><br><span class="line">kube-proxy</span><br></pre></td></tr></table></figure>
+
+<p>创建脚本文件k8s-service-start.sh：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="keyword">for</span> SERVNAME <span class="keyword">in</span> `<span class="built_in">cat</span> service-list.txt`</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">	systemctl status <span class="variable">$SERVNAME</span> &amp;&gt; /dev/null</span><br><span class="line">	<span class="keyword">if</span> [ $? -eq 0 ]</span><br><span class="line">	<span class="keyword">then</span></span><br><span class="line">		<span class="built_in">echo</span> <span class="string">&quot;Already Active : <span class="variable">$SERVNAME</span>&quot;</span></span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		systemctl start <span class="variable">$SERVNAME</span></span><br><span class="line">		systemctl status <span class="variable">$SERVNAME</span> &amp;&gt; /dev/null</span><br><span class="line">		<span class="keyword">if</span> [ $? -eq 0 ]</span><br><span class="line">		<span class="keyword">then</span></span><br><span class="line">			<span class="built_in">echo</span> <span class="string">&quot;Start Success : <span class="variable">$SERVNAME</span>&quot;</span></span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			<span class="built_in">echo</span> <span class="string">&quot;! Start fail : <span class="variable">$SERVNAME</span>&quot;</span></span><br><span class="line">		<span class="keyword">fi</span></span><br><span class="line">	<span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>记得给脚本加上执行权限：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x k8s-service-start.sh</span><br></pre></td></tr></table></figure>
+
+<p>当然，如果已经使用systemctl enable加入了开机启动就无需重复操作了。</p>
+<h3 id="Docker镜像加速"><a href="#Docker镜像加速" class="headerlink" title="Docker镜像加速"></a>Docker镜像加速</h3><p>一般从官方网站下载Docker镜像都比较慢，所以设置一下国内源进行镜像加速。</p>
+<p>在&#x2F;etc&#x2F;docker&#x2F;daemon.json 中写入如下内容（如果文件不存在请新建该文件）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;registry-mirrors&quot;:[&quot;你的镜像加速地址&quot;]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我使用的是阿里云源，在阿里云账号的“容器镜像服务 - 镜像中心 - 镜像加速器”菜单中可以找到你专属的镜像加速地址。</p>
+<p>你也可以使用其他地址：</p>
+<p>网易：<a target="_blank" rel="noopener" href="https://hub-mirror.c.163.com/">https://hub-mirror.c.163.com/</a></p>
+<p>七牛云：<a target="_blank" rel="noopener" href="https://reg-mirror.qiniu.com/">https://reg-mirror.qiniu.com</a></p>
+<p>之后重启docker服务：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动MySQL服务"><a href="#启动MySQL服务" class="headerlink" title="启动MySQL服务"></a>启动MySQL服务</h3><p>以上都是安装和配置，下面正式进入到kubernetes的使用了。</p>
+<p>首先最好新建一个工作文件夹，方便管理。</p>
+<h4 id="编写mysql-rc文件"><a href="#编写mysql-rc文件" class="headerlink" title="编写mysql-rc文件"></a>编写mysql-rc文件</h4><p>在工作文件夹下新建RC定义文件mysql-rc.yaml，内容如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicationController</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">mysql</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">mysql</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">mysql</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">mysql:5.7</span> <span class="comment">#若不加版本号5.7，可能会导致错误</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">3306</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_ROOT_PASSWORD</span></span><br><span class="line">          <span class="attr">value:</span> <span class="string">&quot;123456&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里yaml文件中的kind属性，用来表示资源对象的类型，比如这里就表示一个RC。（最外层的）spec一节表示RC的相关属性定义，如replicas表示期望实例数量，template是创建POD实例的模板。注意template中的labels必须与前面的selector匹配。</p>
+<p>原版书的spec.containers.image没有写版本号，默认拉取latest镜像，这可能会导致一些不兼容的错误。笔者使用5.7版本没有问题。</p>
+<p>另外注意缩进要正确。</p>
+<h4 id="编写mysql-svc文件"><a href="#编写mysql-svc文件" class="headerlink" title="编写mysql-svc文件"></a>编写mysql-svc文件</h4><p>新建Service定义文件mysql-svc.yaml，内容如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">mysql</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">3306</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">mysql</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="启动Service和发布RC"><a href="#启动Service和发布RC" class="headerlink" title="启动Service和发布RC"></a>启动Service和发布RC</h4><p>文件编写完毕后，就可以启动Service和发布RC了。</p>
+<ol>
+<li>创建Service：</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f mysql-svc.yaml</span><br><span class="line"><span class="comment"># 正确输出：service &quot;mysql&quot; created</span></span><br></pre></td></tr></table></figure>
+
+<p>此外对应地，可以用如下命令删除服务：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete -f mysql-svc.yaml</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>查看Service是否创建成功：</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc</span><br><span class="line"><span class="comment"># 正确输出：</span></span><br><span class="line"><span class="comment"># NAME         CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE</span></span><br><span class="line"><span class="comment"># kubernetes   10.254.0.1      &lt;none&gt;        443/TCP          2d</span></span><br><span class="line"><span class="comment"># mysql        10.254.21.86    &lt;none&gt;        3306/TCP         17h</span></span><br></pre></td></tr></table></figure>
+
+<p>其中CLUSTER-IP是kubernetes为POD自动分配的集群内IP，与宿主机无关（且与宿主机网段不能重合）。</p>
+<ol start="3">
+<li>发布RC：</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f mysql-rc.yaml</span><br><span class="line"><span class="comment"># 正确输出：replicationcontroller &quot;mysql&quot; created</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>查看RC状态：</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl get rc</span><br><span class="line"><span class="comment"># 正确输出，READY应为1：</span></span><br><span class="line"><span class="comment"># NAME      DESIRED   CURRENT   READY     AGE</span></span><br><span class="line"><span class="comment"># mysql     1         1         1         17h</span></span><br></pre></td></tr></table></figure>
+
+<p>查看POD状态：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods</span><br><span class="line"><span class="comment"># 正确输出，READY应为1，STATUS应为Running：</span></span><br><span class="line"><span class="comment"># NAME          READY     STATUS    RESTARTS   AGE</span></span><br><span class="line"><span class="comment"># mysql-8811b   1/1       Running   1          17h</span></span><br></pre></td></tr></table></figure>
+
+<p>如果STATUS为Pending或ContainerCreating，说明还在下载或创建容器，可以等待片刻。如果长时间处于此状态，或者状态变为CrashLoopBackOff或Error，说明出现了某些错误。可以检查一下所有的服务是否已开启，yaml文件编写有无错误（拼写、缩进、多余的空格等）。</p>
+<p>读者可能注意到，之前是先编写rc文件再编写svc文件的，但此处是先创建Service再发布RC。实际上，《指南》中是先发布RC再创建Service的，但有博客说这样启动出现了一些问题（虽然不是这个例子），因此这里先创建Service再发布RC。</p>
+<h3 id="启动MyWeb服务"><a href="#启动MyWeb服务" class="headerlink" title="启动MyWeb服务"></a>启动MyWeb服务</h3><p>上一节定义和启动了MySQL服务，这里用同样的步骤启动Tomcat，也就是Web应用。</p>
+<h4 id="编写myweb-rc文件"><a href="#编写myweb-rc文件" class="headerlink" title="编写myweb-rc文件"></a>编写myweb-rc文件</h4><p>创建myweb-rc.yaml文件，内容如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">ReplicationController</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">myweb</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">5</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">myweb</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">myweb</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">myweb</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">kubeguide/tomcat-app:v1</span></span><br><span class="line">          <span class="attr">ports:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">8080</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_SERVICE_HOST</span></span><br><span class="line">            <span class="comment"># value: &#x27;mysql&#x27;</span></span><br><span class="line">            <span class="attr">value:</span> <span class="number">10.254</span><span class="number">.21</span><span class="number">.86</span>	 <span class="comment"># 这里很坑，集群尚未启动域名解析服务，需要直接填写mysql服务的IP地址</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_SERVICE_PORT</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&#x27;3306&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个文件也很关键，按照《指南》里写可能会出错。坑点是MYSQL_SERVICE_HOST的值要直接写mysql服务的IP地址，也就是之前使用<code>kubectl get svc</code>命令查看到的mysql的IP。</p>
+<p>当然，真正应用时一定不会这么做，因为某个POD是有可能挂掉的，下次启动时IP可能就会变。但是在刚刚入门时啥都不懂的情况下，这样做是最快的，否则搞了半天看不到成功结果，是非常打击学习兴趣和信心的（笔者就是QwQ）。</p>
+<h4 id="编写myweb-svc文件"><a href="#编写myweb-svc文件" class="headerlink" title="编写myweb-svc文件"></a>编写myweb-svc文件</h4><p>创建myweb-svc.yaml文件，内容如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">myweb</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">NodePort</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">8080</span></span><br><span class="line">      <span class="attr">nodePort:</span> <span class="number">30001</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">myweb</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="启动Service和发布RC-1"><a href="#启动Service和发布RC-1" class="headerlink" title="启动Service和发布RC"></a>启动Service和发布RC</h4><p>发布Service：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f myweb-svc.yaml</span><br><span class="line"><span class="comment"># 正确输出：service &quot;myweb&quot; created</span></span><br></pre></td></tr></table></figure>
+
+<p>发布RC：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f myweb-rc.yaml</span><br><span class="line"><span class="comment"># 正确输出：replicationcontroller &quot;myweb&quot; created</span></span><br></pre></td></tr></table></figure>
+
+<p>同样地，可以用<code>kubectl get</code>命令来查看各种资源的状态。</p>
+<h3 id="浏览器访问网页"><a href="#浏览器访问网页" class="headerlink" title="浏览器访问网页"></a>浏览器访问网页</h3><p>终于到了激动人心的时刻，配置完毕，可以开始访问网站了。</p>
+<p>使用物理机的浏览器访问：</p>
+<blockquote>
+<p>http:&#x2F;&#x2F;虚拟机的IP:30001&#x2F;demo&#x2F;</p>
+</blockquote>
+<p>如果成功，你会看到如下页面：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200606.png" alt="success"></p>
+<p>点击“Add…”可以增加记录。</p>
+<p>如果不能访问，就用虚拟机自己的浏览器来访问。如果虚拟机可以访问，那么很可能是防火墙的问题，需要关闭后重启kubernetes相关服务，再执行命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -P FORWARD ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p>如果还是不能解决，也许你要从头开始检查每个步骤，甚至可能遇到笔者未遇到的错误。假如下面一节的方法都不能解决你的问题，那么笔者也无能为力了orz！</p>
+<p>Good luck！^_^</p>
+<h3 id="坑点总结"><a href="#坑点总结" class="headerlink" title="坑点总结"></a>坑点总结</h3><p>总结一下笔者踩到的坑。当然也不一定就是关键的错误，但下面的方案笔者都试过。</p>
+<p>使用下面的命令查看pods的日志，可能有助于定位错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl logs POD名</span><br></pre></td></tr></table></figure>
+
+<h4 id="mysql无法链接"><a href="#mysql无法链接" class="headerlink" title="mysql无法链接"></a>mysql无法链接</h4><p><strong>现象</strong></p>
+<p>可以访问网页，但浏览器显示报错：</p>
+<p>Error:com.mysql.jdbc.exceptions.jdbc4.CommunicationsException: Communications link failure The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.</p>
+<p><strong>解决方案</strong></p>
+<p>有2种可能性：</p>
+<ol>
+<li>mysql版本不对。</li>
+<li>无法进行域名解析</li>
+</ol>
+<p>对于1，删除mysql的RC资源，将mysql-rc.yaml中的image参数改为mysql:5.7后重新发布。</p>
+<p>对于2，将myweb-rc.yaml中MYSQL_SERVICE_HOST的value改为mysql服务的IP地址，也就是用<code>kubectl get svc</code>查看到的地址，重新发布RC。</p>
+<h4 id="物理机无法访问网页"><a href="#物理机无法访问网页" class="headerlink" title="物理机无法访问网页"></a>物理机无法访问网页</h4><p><strong>现象</strong></p>
+<p>物理机无法访问网页，但虚拟机可以。</p>
+<p><strong>解决方案</strong></p>
+<ol>
+<li>查看防火墙状态：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status firewalld</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>如果没有关闭则手动关闭：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl disable firewalld  #禁止防火墙开机启动</span><br><span class="line">systemctl stop firewalld     #关闭防火墙服务</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>重启kubernetes相关服务</p>
+</li>
+<li><p>执行以下命令：</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -P FORWARD ACCEPT</span><br></pre></td></tr></table></figure>
+
+<h4 id="无法启动kube-apiserver"><a href="#无法启动kube-apiserver" class="headerlink" title="无法启动kube-apiserver"></a>无法启动kube-apiserver</h4><p><strong>现象</strong></p>
+<p>启动kube-apiserver报错：</p>
+<p>Job for kube-apiserver.service failed because the control process exited with error code. See “systemctl status kube-apiserver.service” and “journalctl -xe” for details.</p>
+<p><strong>解决方案</strong></p>
+<p>首先打开CentOS自己的网络连接，再启动kube-apiserver。</p>
+<h4 id="RC状态卡住"><a href="#RC状态卡住" class="headerlink" title="RC状态卡住"></a>RC状态卡住</h4><p><strong>现象</strong></p>
+<p>RC的状态卡在ContainerCreating&#x2F;Pending，或变成CrashLoopBackOff&#x2F;Error。</p>
+<p><strong>解决方案</strong></p>
+<p>检查rc的yaml文件有无错误，包括拼写、缩进、多余的空格等。</p>
+<p>如果文件编写无误，尝试更换Docker国内镜像源或科学上网。</p>
+<h4 id="其他错误"><a href="#其他错误" class="headerlink" title="其他错误"></a>其他错误</h4><p><strong>现象</strong></p>
+<p>其他报错，或者看不到报错，但虚拟机和物理机都不能访问。</p>
+<p><strong>解决方案</strong></p>
+<p>按照本文从头检查所有步骤，若仍然有错可以尝试：</p>
+<ul>
+<li>删除所有RC和Service，先创建Service，再启动RC</li>
+<li>重启所有kubernetes服务</li>
+<li>重启虚拟机</li>
+<li>打开百度&#x2F;谷歌&#x2F;StackOverflow</li>
+</ul>
+<p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/pengjc/2423665">k8s中部署 Tomcat+MySQL服务</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_38698322/article/details/91155594">在k8s中定义和启动mysql和tomcat服务之后，浏览器无法访问的问题</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" rel="tag"># 云计算</a>
+              <a href="/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/" rel="prev" title="看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树">
+      <i class="fa fa-chevron-left"></i> 看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" rel="next" title="进击的K8S：Kubernetes基础概念">
+      进击的K8S：Kubernetes基础概念 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E5%87%86%E5%A4%87%E5%92%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">2.</span> <span class="nav-text">知识准备和环境准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">Kubernetes安装和配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E9%98%B2%E7%81%AB%E5%A2%99"><span class="nav-number">3.1.</span> <span class="nav-text">关闭防火墙</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85etcd%E5%92%8CKubernetes"><span class="nav-number">3.2.</span> <span class="nav-text">安装etcd和Kubernetes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8kubernetes%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.4.</span> <span class="nav-text">启动kubernetes服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F"><span class="nav-number">4.</span> <span class="nav-text">Docker镜像加速</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8MySQL%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.</span> <span class="nav-text">启动MySQL服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99mysql-rc%E6%96%87%E4%BB%B6"><span class="nav-number">5.1.</span> <span class="nav-text">编写mysql-rc文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99mysql-svc%E6%96%87%E4%BB%B6"><span class="nav-number">5.2.</span> <span class="nav-text">编写mysql-svc文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8Service%E5%92%8C%E5%8F%91%E5%B8%83RC"><span class="nav-number">5.3.</span> <span class="nav-text">启动Service和发布RC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8MyWeb%E6%9C%8D%E5%8A%A1"><span class="nav-number">6.</span> <span class="nav-text">启动MyWeb服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99myweb-rc%E6%96%87%E4%BB%B6"><span class="nav-number">6.1.</span> <span class="nav-text">编写myweb-rc文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99myweb-svc%E6%96%87%E4%BB%B6"><span class="nav-number">6.2.</span> <span class="nav-text">编写myweb-svc文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8Service%E5%92%8C%E5%8F%91%E5%B8%83RC-1"><span class="nav-number">6.3.</span> <span class="nav-text">启动Service和发布RC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E8%AE%BF%E9%97%AE%E7%BD%91%E9%A1%B5"><span class="nav-number">7.</span> <span class="nav-text">浏览器访问网页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%91%E7%82%B9%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">坑点总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql%E6%97%A0%E6%B3%95%E9%93%BE%E6%8E%A5"><span class="nav-number">8.1.</span> <span class="nav-text">mysql无法链接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E6%9C%BA%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE%E7%BD%91%E9%A1%B5"><span class="nav-number">8.2.</span> <span class="nav-text">物理机无法访问网页</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8kube-apiserver"><span class="nav-number">8.3.</span> <span class="nav-text">无法启动kube-apiserver</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RC%E7%8A%B6%E6%80%81%E5%8D%A1%E4%BD%8F"><span class="nav-number">8.4.</span> <span class="nav-text">RC状态卡住</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%94%99%E8%AF%AF"><span class="nav-number">8.5.</span> <span class="nav-text">其他错误</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MidoQ"
+      src="/images/avatar-qmf.png">
+  <p class="site-author-name" itemprop="name">MidoQ</p>
+  <div class="site-description" itemprop="description">钱缪峰的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MidoQ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MidoQ" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:qmfeng@seu.edu.cn" title="E-Mail → mailto:qmfeng@seu.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MidoQ</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'pHkGJsNXBe2ezFAKXvqJPDqz-gzGzoHsz',
+      appKey     : 'QbnOPXmD1ULkk3AYPktpOCvD',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

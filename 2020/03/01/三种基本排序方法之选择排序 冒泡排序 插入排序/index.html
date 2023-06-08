@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-qmf.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-qmf.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-qmf.png">
+  <link rel="mask-icon" href="/images/logo-qmf.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"midoq.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"buttons","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="前言三种最基本的排序方法：选择排序、冒泡排序、插入排序。这些排序并不是学习数据结构时才碰到的，早在学习C++时教材上就有介绍。现在正在学习数据结构，复习并且自己动手实现一下。 本文的代码都是基于数组实现的，以排成升序为例。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="三种基本排序方法之选择排序 冒泡排序 插入排序">
+<meta property="og:url" content="https://midoq.github.io/2020/03/01/%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%20%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%20%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/index.html">
+<meta property="og:site_name" content="TARDIS">
+<meta property="og:description" content="前言三种最基本的排序方法：选择排序、冒泡排序、插入排序。这些排序并不是学习数据结构时才碰到的，早在学习C++时教材上就有介绍。现在正在学习数据结构，复习并且自己动手实现一下。 本文的代码都是基于数组实现的，以排成升序为例。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201416.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201447.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201456.png">
+<meta property="article:published_time" content="2020-03-01T07:26:48.000Z">
+<meta property="article:modified_time" content="2022-11-17T14:51:04.000Z">
+<meta property="article:author" content="MidoQ">
+<meta property="article:tag" content="C&#x2F;C++">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201416.png">
+
+<link rel="canonical" href="https://midoq.github.io/2020/03/01/%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%20%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%20%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>三种基本排序方法之选择排序 冒泡排序 插入排序 | TARDIS</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TARDIS</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">知识时光机</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签集合</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间线旅行</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/03/01/%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%20%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%20%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar-qmf.png">
+      <meta itemprop="name" content="MidoQ">
+      <meta itemprop="description" content="钱缪峰的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TARDIS">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          三种基本排序方法之选择排序 冒泡排序 插入排序
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-01 15:26:48" itemprop="dateCreated datePublished" datetime="2020-03-01T15:26:48+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">算法与数据结构</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/03/01/%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%20%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%20%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/01/%E4%B8%89%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%8E%92%E5%BA%8F%E6%96%B9%E6%B3%95%E4%B9%8B%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%20%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%20%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>三种最基本的排序方法：选择排序、冒泡排序、插入排序。这些排序并不是学习数据结构时才碰到的，早在学习C++时教材上就有介绍。现在正在学习数据结构，复习并且自己动手实现一下。</p>
+<p>本文的代码都是基于数组实现的，以排成升序为例。</p>
+<span id="more"></span>
+
+<h2 id="选择排序"><a href="#选择排序" class="headerlink" title="选择排序"></a>选择排序</h2><blockquote>
+<p>选择排序的思想：<br>不断选择最大的数依次排到数组最右端，使得数组从右到左逐渐有序。</p>
+</blockquote>
+<p>当然从最小开始也可，本文三种排序默认都是从最大开始。</p>
+<p>具体步骤：</p>
+<ol>
+<li>从头开始遍历数组，找出最大数的下标，将最大数与最右侧的数交换。</li>
+<li>现在最右侧已经有序，排除最右侧有序部分，重新遍历找出第二大的数，排到右侧第二位。</li>
+<li>依次类推，重复这一过程，直到数组有序。</li>
+</ol>
+<p>这里有一个何时结束程序的问题。很明显，当需要遍历的部分只剩下1个时，表明已经排序完毕了。但有可能出现可以提前结束的情况，某次遍历结束后数组恰好是有序的，就能够提前结束遍历。</p>
+<p>因此通常设定一个标志sorted，在每次遍历开始设置为true，即默认已经有序，遍历时一旦出现<code>左&gt;右</code>的情况，就将sorted置为false。</p>
+<p>如果这轮遍历没有出现<code>左&gt;右</code>的情况，sorted不会被置false，此时数组已经有序，无需继续下一轮迭代。</p>
+<p>可以结合以下示意图理解算法步骤和代码。其中白色表示有序部分，灰色表示无序部分。</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201416.png" alt="selection"></p>
+<p>完整代码如下，swap函数用于 交换两个位置的数值。</p>
+<p><b>sort.h</b></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/****************************************</span></span><br><span class="line"><span class="comment">* Swap two number.</span></span><br><span class="line"><span class="comment">****************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">swap</span><span class="params">(T &amp;x, T &amp;y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	T temp = x;</span><br><span class="line">	x = y;</span><br><span class="line">	y = temp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/****************************************</span></span><br><span class="line"><span class="comment">* Selection-sort in ascending order.</span></span><br><span class="line"><span class="comment">@param</span></span><br><span class="line"><span class="comment">a[]: input array</span></span><br><span class="line"><span class="comment">n: size of input array</span></span><br><span class="line"><span class="comment">****************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SelectionSort</span><span class="params">(T a[], <span class="type">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">bool</span> sorted = <span class="literal">false</span>;</span><br><span class="line">	<span class="comment">//int iterCount = 0;</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> size = n; !sorted &amp;&amp; size &gt; <span class="number">1</span>; size--)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="type">int</span> indexOfMax = <span class="number">0</span>;</span><br><span class="line">		sorted = <span class="literal">true</span>;	<span class="comment">//每轮遍历前要初始化标志</span></span><br><span class="line">		<span class="comment">//寻找最大值的下标</span></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; size; i++)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (a[indexOfMax] &lt; a[i])</span><br><span class="line">				indexOfMax = i;</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				sorted = <span class="literal">false</span>;	<span class="comment">//如果有左&gt;右，说明还是无序</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">swap</span>(a[indexOfMax], a[size - <span class="number">1</span>]);	<span class="comment">//将最大值与最右端交换</span></span><br><span class="line">		<span class="comment">//iterCount++;</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//std::cout &lt;&lt; &quot;iterCount=&quot; &lt;&lt; iterCount &lt;&lt; std::endl;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><b>main.cpp</b></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sort.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">PrintArray</span><span class="params">(T arr[], <span class="type">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		std::cout &lt;&lt; arr[i] &lt;&lt; <span class="string">&#x27;\t&#x27;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	std::cout &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> <span class="type">int</span> arrSize = <span class="number">6</span>;</span><br><span class="line">	<span class="type">int</span> a1[arrSize] = &#123; <span class="number">6</span>, <span class="number">5</span>, <span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span> &#125;;	<span class="comment">//for selection-sort</span></span><br><span class="line"></span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;selection-sort:&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">	<span class="built_in">PrintArray</span>&lt;<span class="type">int</span>&gt;(a1, arrSize);</span><br><span class="line">	<span class="built_in">SelectionSort</span>&lt;<span class="type">int</span>&gt;(a1, arrSize);</span><br><span class="line">	<span class="built_in">PrintArray</span>&lt;<span class="type">int</span>&gt;(a1, arrSize);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将包含<code>iterCount</code>的3行解除注释，分别在最外侧for循环加与不加<code>!sorted</code>条件时测试，会发现确实提前退出了循环。</p>
+<p>另外注意两层for循环的边界。外层循环使得无序部分不断缩小（向左缩进），内层循环对目前仍然无序的部分进行遍历，查找最大值。</p>
+<p><b>多说一句</b></p>
+<p>一开始被这种写法困扰了，主要是觉得在判断为无序时给sorted进行了重复的赋值。</p>
+<p>然而想要减少重复赋值，目前也只能想到再加一个判断sorted当前值的条件，这样做虽然少了赋值但多了比较，总的来说并没有节约很多操作。</p>
+<h2 id="冒泡排序"><a href="#冒泡排序" class="headerlink" title="冒泡排序"></a>冒泡排序</h2><p>通常和冒泡排序一起出现的词是“顾名思义”。想象将数组旋转，右端向上，左端向下，冒泡排序每轮迭代让最大值“上浮”到最右端。</p>
+<blockquote>
+<p>冒泡排序的思想：<br>从左侧开始比较相邻的数，如果左侧值较大，则进行交换，每轮遍历使最大值交换到最右端。</p>
+</blockquote>
+<p>冒泡排序同样有提前结束的优化方法。每当发生相邻交换，就将sorted标志标为false，否则保持这轮循环开始时的true值。如果sorted保持true未变化过，说明本轮已经检测到数组有序。</p>
+<p>可以结合示意图理解代码。其中白色表示有序部分，灰色表示无序部分。</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201447.png" alt="bubble"></p>
+<p>完整代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/****************************************</span></span><br><span class="line"><span class="comment">* Bubble-sort in ascending order.</span></span><br><span class="line"><span class="comment">@param</span></span><br><span class="line"><span class="comment">a[]: input array</span></span><br><span class="line"><span class="comment">n: size of input array</span></span><br><span class="line"><span class="comment">****************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">BubbleSort</span><span class="params">(T a[], <span class="type">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">bool</span> sorted = <span class="literal">false</span>;</span><br><span class="line">	<span class="comment">//int iterCount = 0;</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> size = n; !sorted &amp;&amp; size &gt; <span class="number">1</span>; size--)</span><br><span class="line">	&#123;</span><br><span class="line">		sorted = <span class="literal">true</span>;	<span class="comment">//每轮遍历前要初始化标志</span></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; size; i++)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (a[i - <span class="number">1</span>] &gt; a[i])</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">swap</span>(a[i - <span class="number">1</span>], a[i]);</span><br><span class="line">				sorted = <span class="literal">false</span>;		<span class="comment">//发生相邻交换，目前仍然无序</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//iterCount++;</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//std::cout &lt;&lt; &quot;iterCount=&quot; &lt;&lt; iterCount &lt;&lt; std::endl;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主函数与选择排序类似，这里略去。</p>
+<p>用数组<code>&#123; 6, 1, 2, 5, 3, 4 &#125;</code>测试，可以观察到sorted标志的影响，增加sorted标志后提前退出了循环。</p>
+<p>注意两层for循环的边界。外层循环用于缩小无序部分的边界。内层循环用于从左到右遍历比较相邻值，其边界是无序部分的边界。</p>
+<h2 id="插入排序"><a href="#插入排序" class="headerlink" title="插入排序"></a>插入排序</h2><blockquote>
+<p>插入排序的思想：<br>开始时将最左侧a[0]视为有序部分，从a[1]开始，依次将无序部分的数插入到有序部分相应位置。</p>
+</blockquote>
+<p>具体步骤：<br>选择无序部分第一个数为当前插入数，与左侧有序部分从右向左依次比较，如果插入数较小，则将有序部分被比较的数右移；如果插入数较大，则将插入数插在被比较数的后面。</p>
+<p>可以结合示意图理解。其中白色表示有序部分，灰色表示无序部分。</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127201456.png" alt="insertion"></p>
+<p>完整代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/****************************************</span></span><br><span class="line"><span class="comment">* Insertion-sort in ascending order.</span></span><br><span class="line"><span class="comment">@param</span></span><br><span class="line"><span class="comment">a[]: input array</span></span><br><span class="line"><span class="comment">n: size of input array</span></span><br><span class="line"><span class="comment">****************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">InsertionSort</span><span class="params">(T a[], <span class="type">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//int iterCount = 0;</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		T numNow = a[i];</span><br><span class="line">		<span class="type">int</span> j = i - <span class="number">1</span>;</span><br><span class="line">		<span class="keyword">for</span> (; j &gt;= <span class="number">0</span> &amp;&amp; a[j] &gt; numNow; j--)</span><br><span class="line">		&#123;</span><br><span class="line">			a[j + <span class="number">1</span>] = a[j];</span><br><span class="line">		&#125;</span><br><span class="line">		a[j + <span class="number">1</span>] = numNow;</span><br><span class="line">		<span class="comment">//iterCount++;</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//std::cout &lt;&lt; &quot;iterCount=&quot; &lt;&lt; iterCount &lt;&lt; std::endl;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主函数与选择排序类似，这里略去。</p>
+<p>注意两层for循环的边界。外层循环用于缩小无序边界，与上面两种排序不同，插入排序的无序部分是“向右缩进”的。反过来理解为有序部分由左侧开始“扩张”或许更直观。</p>
+<p>而内层循环从有序部分的右边开始，依次寻找插入数的正确位置。当内层循环退出时，下标j已经是比插入数小的数了，应当将后面一个数a[j+1]赋值为插入数。在此之前，更大的数已经安全地移动到了更右侧，无需担心被覆盖。</p>
+<h2 id="三种排序方式的比较"><a href="#三种排序方式的比较" class="headerlink" title="三种排序方式的比较"></a>三种排序方式的比较</h2><h3 id="特征比较"><a href="#特征比较" class="headerlink" title="特征比较"></a>特征比较</h3><p>冒泡排序的特征非常明显：相邻交换，大数上（右）浮。</p>
+<p>但选择排序和插入排序的特征好像不是很明显。以前在C++课的时候我一直疑惑，难道选择排序将最大数放到最右端的操作不能理解为一种“插入”吗？只是选择排序是交换，插入排序是依次移动而已。</p>
+<p>现在根据我的理解，关键就在于已确定的因素不一样。</p>
+<p>选择排序是“定位找数”。每轮迭代前，需要移动的数是未知的，需要去查找。而插入的位置是确定的，即有序部分边缘再向外的一位。</p>
+<p>插入排序则是“定数找位”。每轮迭代前，需要移动的数是确定的，即无序部分的第一个数。而插入的位置是未知的，需要依次查找比较。</p>
+<h3 id="稳定性比较"><a href="#稳定性比较" class="headerlink" title="稳定性比较"></a>稳定性比较</h3><p>选择排序是非稳定排序。在将最大数交换到最右侧时，可能将“不那么小”的数交换到比较靠左的地方，从而可能使无序部分变得“更加”无序。</p>
+<p>冒泡排序是稳定排序。总是比较相邻的数，整个数组必然是不断趋向有序的，没有跳过数进行交换，不会将更大的数交换到左侧去。</p>
+<p>插入排序也是稳定排序。因为每次移动的数只是无序部分的第一个，之后的数完全不会被影响到。</p>
+<p>至于时间复杂度，将在之后学到复杂度的地方再比较。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C-C/" rel="tag"># C/C++</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/28/%E5%A4%9C%EF%BC%88%E9%9A%8F%E7%AC%94%EF%BC%89/" rel="prev" title="夜（随笔）">
+      <i class="fa fa-chevron-left"></i> 夜（随笔）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/11/%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%AE%80%E5%8D%95%E5%AE%9E%E9%99%85%E4%B8%8A%E5%8D%B4%E5%BE%88%E7%89%9B%E7%9A%84KMP%E7%AE%97%E6%B3%95%EF%BC%9ALeetCode572-%E5%8F%A6%E4%B8%80%E6%A3%B5%E6%A0%91%E7%9A%84%E5%AD%90%E6%A0%91/" rel="next" title="看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树">
+      看起来简单实际上却很牛的KMP算法：LeetCode572-另一棵树的子树 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">选择排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">冒泡排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">插入排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E6%8E%92%E5%BA%8F%E6%96%B9%E5%BC%8F%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">5.</span> <span class="nav-text">三种排序方式的比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%AF%94%E8%BE%83"><span class="nav-number">5.1.</span> <span class="nav-text">特征比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E6%80%A7%E6%AF%94%E8%BE%83"><span class="nav-number">5.2.</span> <span class="nav-text">稳定性比较</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MidoQ"
+      src="/images/avatar-qmf.png">
+  <p class="site-author-name" itemprop="name">MidoQ</p>
+  <div class="site-description" itemprop="description">钱缪峰的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MidoQ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MidoQ" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:qmfeng@seu.edu.cn" title="E-Mail → mailto:qmfeng@seu.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MidoQ</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'pHkGJsNXBe2ezFAKXvqJPDqz-gzGzoHsz',
+      appKey     : 'QbnOPXmD1ULkk3AYPktpOCvD',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

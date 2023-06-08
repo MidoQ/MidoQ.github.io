@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-qmf.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-qmf.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-qmf.png">
+  <link rel="mask-icon" href="/images/logo-qmf.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"midoq.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"buttons","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Kubernetes简介Kubernetes简称K8S（因为k和s中间有8个字母），是一个开源的容器集群管理平台，基于Go语言编写。 使用K8S，将简化分布式系统上的容器应用部署，使得开发人员可以专注于业务软件，而非较为底层的负载均衡、服务监控等。因此，可以认为它是介于操作系统软件和应用软件之间的”中间件“。K8S具有强大的自动化机制，降低了系统后期的运维难度。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进击的K8S：Kubernetes基础概念">
+<meta property="og:url" content="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="TARDIS">
+<meta property="og:description" content="Kubernetes简介Kubernetes简称K8S（因为k和s中间有8个字母），是一个开源的容器集群管理平台，基于Go语言编写。 使用K8S，将简化分布式系统上的容器应用部署，使得开发人员可以专注于业务软件，而非较为底层的负载均衡、服务监控等。因此，可以认为它是介于操作系统软件和应用软件之间的”中间件“。K8S具有强大的自动化机制，降低了系统后期的运维难度。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200334.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200444.png">
+<meta property="article:published_time" content="2020-07-26T09:49:09.000Z">
+<meta property="article:modified_time" content="2022-11-17T14:51:04.000Z">
+<meta property="article:author" content="MidoQ">
+<meta property="article:tag" content="云计算">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200334.png">
+
+<link rel="canonical" href="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>进击的K8S：Kubernetes基础概念 | TARDIS</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TARDIS</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">知识时光机</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签集合</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间线旅行</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar-qmf.png">
+      <meta itemprop="name" content="MidoQ">
+      <meta itemprop="description" content="钱缪峰的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TARDIS">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          进击的K8S：Kubernetes基础概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-26 17:49:09" itemprop="dateCreated datePublished" datetime="2020-07-26T17:49:09+08:00">2020-07-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BA%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">云计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/26/%E8%BF%9B%E5%87%BB%E7%9A%84K8S%EF%BC%9AKubernetes%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="Kubernetes简介"><a href="#Kubernetes简介" class="headerlink" title="Kubernetes简介"></a>Kubernetes简介</h3><p>Kubernetes简称K8S（因为k和s中间有8个字母），是一个开源的容器集群管理平台，基于Go语言编写。</p>
+<p>使用K8S，将简化分布式系统上的容器应用部署，使得开发人员可以专注于业务软件，而非较为底层的负载均衡、服务监控等。因此，可以认为它是介于操作系统软件和应用软件之间的”中间件“。K8S具有强大的自动化机制，降低了系统后期的运维难度。</p>
+<span id="more"></span>
+
+<p>此外，K8S没有限定编程接口，无论Java、Go、C++还是Python编写的服务，都可以映射为K8S的Service。并且由于其对现有的语言、框架、中间件没有任何侵入性，使得服务易于迁移到K8S上。</p>
+<p>本文力图使用通俗易懂的语言概括Kubernetes的一些概念。在阅读本文前，你至少需要对Linux、docker、容器、yaml&#x2F;json等有所了解。</p>
+<h3 id="Kubernetes概貌认知"><a href="#Kubernetes概貌认知" class="headerlink" title="Kubernetes概貌认知"></a>Kubernetes概貌认知</h3><p>在遇到一项新技术时，笔者习惯于先搞清楚它“是什么“，为什么被发明出来，是如何使用和运作的。</p>
+<h4 id="为什么需要Kubernetes"><a href="#为什么需要Kubernetes" class="headerlink" title="为什么需要Kubernetes"></a>为什么需要Kubernetes</h4><p>如果读者对容器有所了解，并且有一定的使用经验，那么就很容易理解Kubernetes存在的理由。</p>
+<p>容器是运行在物理机上的轻量化“虚拟机”，一般一个应用程序就会启用一个容器。由于各种原因，容器中的程序也许会出现错误，甚至容器和服务器本身会挂掉。在云数据中心有大量的服务器，每台服务器上可能运行着几十个乃至上百个容器，如果单纯靠运维人员去监视、操作每个容器，那肯定是不现实的。因此就需要更高一层的容器编排管理程序，来自动化地管理容器应用。</p>
+<p>或许我们可以自己去搭建这个平台，不过Kubernetes的出现为我们省去了许多麻烦。有了Kubernetes，我们只需要安装和启动它的一组服务就可以了。开发或运维人员只需要编写一些yaml或json文件，指定集群的期望状态，然后在Terminal运行kubectl命令对集群进行操作，剩下的过程都由Kubernetes自动完成。这样，开发人员就可以专注于业务应用，而非与大量的服务器硬件和操作系统本身打交道，同时后期运维也变得非常简单。</p>
+<h4 id="Kubernetes的服务组成"><a href="#Kubernetes的服务组成" class="headerlink" title="Kubernetes的服务组成"></a>Kubernetes的服务组成</h4><p>通常至少需要启动以下的服务以构成完整的Kubernetes系统：</p>
+<ul>
+<li>etcd：数据库。平台内的各种数据、程序的状态在这里存储和交换。不过etcd并不是Kubernetes实现的，后者只是使用它作为平台的数据库。</li>
+<li>docker：Kubernetes管理的对象。准确来说管理的对象是容器，docker只是Kubernetes支持的容器运行时的其中一种。当然，它本身也不是Kubernetes实现的。</li>
+<li>kube-apiserver：各类资源的增、删、改、查、watch等操作的统一接口。</li>
+<li>kube-controller-manager：集群的管理控制中心，负责各类资源的管理。比如某个Node宕机时，controller-manager会发现故障并自动化修复，保证集群处在预期的工作状态。简单来说，它解决Pod数量和状态“对不对”的问题。</li>
+<li>kube-scheduler：负责POD的调度工作，负责将Controller Manager创建的Pod调度到具体的Node上。简单来说，它解决controller manager创建的Pod“去哪”的问题。</li>
+<li>kubelet：运行在Node上，管理下发到本节点的Pod本身及Pod中的容器。</li>
+<li>kube-proxy：Kubernetes集群内有大量的容器和服务，它们通过TCP相互通信，kube-proxy就负责解决通信的问题。</li>
+</ul>
+<p>你可以通过Kubernetes官网的这张图来了解其整体结构：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200334.png" alt="k8s"></p>
+<p>读者可以通过阅读笔者的上一篇博客<a href="https://midoq.github.io/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%E2%80%94%E2%80%94%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/">《Kubernetes单机创建MySQL-Tomcat演示程序》</a>，动手实践来了解整个Kubernetes到底是如何运转的。</p>
+<h3 id="Kubernetes关键概念"><a href="#Kubernetes关键概念" class="headerlink" title="Kubernetes关键概念"></a>Kubernetes关键概念</h3><p>或许上一节的一些术语还让读者非常疑惑，现在我们一起来具体看看一些重要概念的意思。</p>
+<h4 id="集群和节点"><a href="#集群和节点" class="headerlink" title="集群和节点"></a>集群和节点</h4><p>一个集群就是数台运行着应用程序的服务器，每台服务器被称为一个节点，至少3个节点才可以称得上是一个集群。</p>
+<p>节点可以是物理机，也可以是虚拟机（传统意义上的），只要能够运行docker和Kubernetes服务。</p>
+<p>节点有2种：</p>
+<ul>
+<li>主节点Master：是整个集群的管理中心。Master上运行的进程包括：<ul>
+<li>etcd</li>
+<li>kube-apiserver</li>
+<li>kube-controller-manager</li>
+<li>kube-scheduler</li>
+</ul>
+</li>
+<li>工作节点Node：运行具体的工作负载（容器中的应用程序）。Node上运行的进程包括：<ul>
+<li>容器运行时</li>
+<li>kubelet</li>
+<li>kube-proxy</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Tip：此处有一个小的歧义，工作节点Node直译也是节点。“节点”一词到底是Node和Master的合称，还是单指Node，英文语境下似乎是后者，而中文里似乎比较模糊。笔者目前习惯于将Node和Master都称作”节点“，而将Node称作”工作节点“，这样交流沟通时指代比较明确。</p>
+</blockquote>
+<p>Node可以在运行期间动态加入集群，默认情况下kubelet会向Mater注册自己。一旦加入集群，kubelet会定时向Mater节点汇报自身状态，以便Master进行管理调度。</p>
+<p>如果某个Node超过指定时间没有上报信息，就会被Master判定为失联。该Node的状态将被标记为Not Ready，上面的负载会被转移。</p>
+<h4 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h4><p>Kubernetes对象是Kubernetes系统中的持久实体。Kubernetes使用这些实体来表示集群的状态，包括：</p>
+<ul>
+<li>哪些容器正在运行，运行在那些Node上</li>
+<li>容器应用可用的资源</li>
+<li>关于应用如何运行的策略</li>
+</ul>
+<p>一旦创建了对象，Kubernetes会确保对象存在。通过创建对象，可以告诉Kubernetes系统你希望集群的目标状态是什么样的。</p>
+<p>一般在yaml或json文件中定义对象，再通过Kubernetes API来使用（增删改查）。有两种方式来操作对象（即调用API），一是通过kubectl命令行工具调用，二是在编程语言中调用——目前官方提供了Go和Python的库。</p>
+<blockquote>
+<p>Tip：对象不是一个进程或一组进程，指示对象存在的是一段信息的记录（通常是etcd中或文件中）。</p>
+</blockquote>
+<h4 id="Name和UID"><a href="#Name和UID" class="headerlink" title="Name和UID"></a>Name和UID</h4><p>所有对象都用Name和UID来明确标识。</p>
+<p>Name就是对象的名称，通常一部分是由用户在对象定义文件中自定义的。那么另一部分是什么？</p>
+<p>可以思考这样一个问题：以上面的Pod为例，假如有5个myweb应用的副本（这非常正常，短时间内很可能有多个用户访问一个网页），如何区分它们？笔者理解的是，Kubernetes创建Pod时会在Name中加上一段随机的字符，以区分不同的副本，如myweb-w3ec4，myweb-t9p84等（笔者随便写的，具体的机制还没有学习到，大概也是哈希之类）。这有点类似于git的版本号。</p>
+<p>从上面也可以看出，一个Name在同一时间只能被一个对象拥有。如果对象被删除，可以使用相同的Name创建新的对象。</p>
+<p>UID则完全是由Kubernetes生成的。在Kubernetes集群的整个生命周期内，每个对象都拥有不同的UID。也就是说，不仅同一时刻所有的对象UID都不同，而且即便某个对象被删除后重新创建，也会拥有不同的UID。</p>
+<h4 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h4><p>Pod可以说是Kubernetes中最重要的对象，它是Kubernetes中的最小部署单元。Pod通常由一组容器构成，包括一个根容器，和其他一些共同完成业务功能的容器。如下图所示：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/20210127200444.png" alt="pod"></p>
+<p>为什么不以容器本身作为管理的单元，而是又抽象出Pod？原因主要有以下几点：</p>
+<ul>
+<li>一项业务功能通常是由好几个应用程序共同完成的，需要作为一个整体。但单个业务容器异常不能代表业务整体挂掉，难以判断一项业务是否正常进行。抽象为Pod之后，用根容器的状态代表整个Pod的状态解决了这个问题。</li>
+<li>Pod内部通过共享根容器挂载的卷，简化了业务容器间的通信。</li>
+<li>Pod内部共享根容器的IP，简化了与Pod之间（不同业务之间）的通信。</li>
+</ul>
+<h5 id="Pod的两种类型"><a href="#Pod的两种类型" class="headerlink" title="Pod的两种类型"></a><strong>Pod的两种类型</strong></h5><p>Pod信息存放的位置，实际上对应了Pod的两种类型：普通Pod，静态Pod。</p>
+<p>普通Pod被创建后，其信息会被存放在etcd数据库中，然后会被调度到具体的Node上进行绑定，该Node中的kubelet将其实例化成一组容器。默认情况下，如果一个容器出现问题，Kubernetes检测到后将重启整个Pod——实际上是重启Pod中的所有容器。如果Node宕机，则将在其他Node重新生成新的完全一样的Pod代替它。</p>
+<p>与此相反，静态Pod则比较特殊，其信息存放在某个具体的Node上的一个具体文件中，只在此Node运行，不会被转移。</p>
+<h5 id="Pod的资源限额"><a href="#Pod的资源限额" class="headerlink" title="Pod的资源限额"></a>Pod的资源限额</h5><p>可以对Pod使用的计算资源做限额，包括CPU和Memory两种。</p>
+<p>CPU限额的单位是千分之一个CPU核心，记作m。通常一个容器的配额有100<del>300m，即0.1</del>0.3个CPU核心。Memory限额的单位是内存字节数。</p>
+<p>对配额限定有两个参数：</p>
+<ul>
+<li>Requets：资源的最小申请量，系统必须满足要求。</li>
+<li>Limits：资源最大允许使用的量，超过它可能会kill该容器并重启。</li>
+</ul>
+<h4 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h4><p>Service是Kubernetes中另一种重要的对象，它定义了一种访问实体资源（如Pod）的策略，或者说入口，这就是通常说的“微服务”。</p>
+<p>考虑一个图片处理的后台应用，它有3个副本。这些副本是可以互相代替的，也就是访问谁的效果都是一样的，甚至可能挂掉重启。前端不应该也没必要关心到底调用哪个副本，Service定义的统一入口实现了前后端的解耦。</p>
+<p>Pod的IP会随着Pod本身的销毁和创建发生变化。与此相反，每个Service创建时都会被分配一个全局唯一的虚拟IP地址，称为Cluster-IP。在Service的整个生命周期内，该Cluster-IP不会发生变化。客户端实际上访问的是Service，并且我们还希望客户端能够通过名称去访问。</p>
+<p>“通过名称而不是地址去访问”，这句话让读者有何联想？没错，就是DNS。用Service的Name与Service的Cluster-IP做一个DNS域名映射，这就是Kubernetes的服务发现机制。</p>
+<blockquote>
+<p>参考资料：</p>
+<p>《Kubernetes权威指南》（龚正等著）</p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/home/">Kubernetes官网文档</a></p>
+<p><a target="_blank" rel="noopener" href="http://docs.kubernetes.org.cn/">Kubernetes中文文档</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" rel="tag"># 云计算</a>
+              <a href="/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/25/Kubernetes%E5%8D%95%E6%9C%BA%E5%88%9B%E5%BB%BAMySQL-Tomcat%E6%BC%94%E7%A4%BA%E7%A8%8B%E5%BA%8F%EF%BC%9A%E3%80%8AKubernetes%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0demo%E6%8A%A5%E9%94%99%E8%B8%A9%E5%9D%91/" rel="prev" title="Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑">
+      <i class="fa fa-chevron-left"></i> Kubernetes单机创建MySQL+Tomcat演示程序：《Kubernetes权威指南》第一章demo报错踩坑
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/27/Linux%E5%BC%80%E5%8F%91%E6%9D%BF%E8%BF%9E%E6%8E%A5WPA%E5%8A%A0%E5%AF%86%E7%9A%84AP%E8%B7%AF%E7%94%B1%E5%99%A8/" rel="next" title="Linux开发板连接WPA加密的AP路由器">
+      Linux开发板连接WPA加密的AP路由器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes%E6%A6%82%E8%B2%8C%E8%AE%A4%E7%9F%A5"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes概貌认知</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81Kubernetes"><span class="nav-number">2.1.</span> <span class="nav-text">为什么需要Kubernetes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kubernetes%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%BB%84%E6%88%90"><span class="nav-number">2.2.</span> <span class="nav-text">Kubernetes的服务组成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernetes%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">Kubernetes关键概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%92%8C%E8%8A%82%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">集群和节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1"><span class="nav-number">3.2.</span> <span class="nav-text">对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Name%E5%92%8CUID"><span class="nav-number">3.3.</span> <span class="nav-text">Name和UID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pod"><span class="nav-number">3.4.</span> <span class="nav-text">Pod</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Pod%E7%9A%84%E4%B8%A4%E7%A7%8D%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.4.1.</span> <span class="nav-text">Pod的两种类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Pod%E7%9A%84%E8%B5%84%E6%BA%90%E9%99%90%E9%A2%9D"><span class="nav-number">3.4.2.</span> <span class="nav-text">Pod的资源限额</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Service"><span class="nav-number">3.5.</span> <span class="nav-text">Service</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MidoQ"
+      src="/images/avatar-qmf.png">
+  <p class="site-author-name" itemprop="name">MidoQ</p>
+  <div class="site-description" itemprop="description">钱缪峰的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MidoQ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MidoQ" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:qmfeng@seu.edu.cn" title="E-Mail → mailto:qmfeng@seu.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MidoQ</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'pHkGJsNXBe2ezFAKXvqJPDqz-gzGzoHsz',
+      appKey     : 'QbnOPXmD1ULkk3AYPktpOCvD',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

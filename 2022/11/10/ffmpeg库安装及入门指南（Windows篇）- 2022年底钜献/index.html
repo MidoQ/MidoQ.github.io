@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-qmf.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-qmf.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-qmf.png">
+  <link rel="mask-icon" href="/images/logo-qmf.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"midoq.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"buttons","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近项目需要，使用了 ffmpeg 做摄像头视频采集和串流。这几天有点时间，打算把相关的一些知识记录分享一下。 在撰写本文时，我又在另外一台电脑上把 ffmpeg 重新安装了一遍，所以绝对真实靠谱！如果你觉得文章写得还不错，敬请点个赞支持一下，十分感谢~ ffmpeg 简介ffmpeg是一套跨平台的，用于音视频录制、转换、流化等操作的完善的解决方案，它是业界最负盛名的开源音视频框架之一。许多软件都">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ffmpeg库安装及入门指南（Windows篇）- 2022年底钜献">
+<meta property="og:url" content="https://midoq.github.io/2022/11/10/ffmpeg%E5%BA%93%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97%EF%BC%88Windows%E7%AF%87%EF%BC%89-%202022%E5%B9%B4%E5%BA%95%E9%92%9C%E7%8C%AE/index.html">
+<meta property="og:site_name" content="TARDIS">
+<meta property="og:description" content="最近项目需要，使用了 ffmpeg 做摄像头视频采集和串流。这几天有点时间，打算把相关的一些知识记录分享一下。 在撰写本文时，我又在另外一台电脑上把 ffmpeg 重新安装了一遍，所以绝对真实靠谱！如果你觉得文章写得还不错，敬请点个赞支持一下，十分感谢~ ffmpeg 简介ffmpeg是一套跨平台的，用于音视频录制、转换、流化等操作的完善的解决方案，它是业界最负盛名的开源音视频框架之一。许多软件都">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-20-12-42.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-11-11-13.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-11-16-46.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-11-07-29.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-15-10-59.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-15-11-31.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-12-07-39.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-15-20-27.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-15-33-12.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-17-21-35.png">
+<meta property="og:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-18-23-40.png">
+<meta property="article:published_time" content="2022-11-10T06:12:43.000Z">
+<meta property="article:modified_time" content="2023-06-08T07:01:48.454Z">
+<meta property="article:author" content="MidoQ">
+<meta property="article:tag" content="音视频">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-20-12-42.png">
+
+<link rel="canonical" href="https://midoq.github.io/2022/11/10/ffmpeg%E5%BA%93%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97%EF%BC%88Windows%E7%AF%87%EF%BC%89-%202022%E5%B9%B4%E5%BA%95%E9%92%9C%E7%8C%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ffmpeg库安装及入门指南（Windows篇）- 2022年底钜献 | TARDIS</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TARDIS</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">知识时光机</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签集合</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间线旅行</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2022/11/10/ffmpeg%E5%BA%93%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97%EF%BC%88Windows%E7%AF%87%EF%BC%89-%202022%E5%B9%B4%E5%BA%95%E9%92%9C%E7%8C%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar-qmf.png">
+      <meta itemprop="name" content="MidoQ">
+      <meta itemprop="description" content="钱缪峰的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TARDIS">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ffmpeg库安装及入门指南（Windows篇）- 2022年底钜献
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-10 14:12:43" itemprop="dateCreated datePublished" datetime="2022-11-10T14:12:43+08:00">2022-11-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/11/10/ffmpeg%E5%BA%93%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97%EF%BC%88Windows%E7%AF%87%EF%BC%89-%202022%E5%B9%B4%E5%BA%95%E9%92%9C%E7%8C%AE/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/11/10/ffmpeg%E5%BA%93%E5%AE%89%E8%A3%85%E5%8F%8A%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97%EF%BC%88Windows%E7%AF%87%EF%BC%89-%202022%E5%B9%B4%E5%BA%95%E9%92%9C%E7%8C%AE/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近项目需要，使用了 ffmpeg 做摄像头视频采集和串流。这几天有点时间，打算把相关的一些知识记录分享一下。</p>
+<p>在撰写本文时，我又在另外一台电脑上把 ffmpeg 重新安装了一遍，所以绝对真实靠谱！如果你觉得文章写得还不错，敬请点个赞支持一下，十分感谢~</p>
+<h2 id="ffmpeg-简介"><a href="#ffmpeg-简介" class="headerlink" title="ffmpeg 简介"></a>ffmpeg 简介</h2><p>ffmpeg是一套跨平台的，用于音视频录制、转换、流化等操作的完善的解决方案，它是业界最负盛名的开源音视频框架之一。许多软件都是基于ffmpeg开发的，如格式工厂、各种xx影音等。</p>
+<span id="more"></span>
+
+<p>ffmpeg 是一套开源库以及命令行工具的集合，用户既可以使用命令行直接对音视频进行操作（CLI），也可以调用其开源库进行个性化的功能开发（SDK）。</p>
+<p>如果要在自己的程序中使用 ffmpeg ，那么使用它的 SDK 是最好的选择。当前 ffmpeg 包含以下几个库：</p>
+<ul>
+<li><strong>libavcodec</strong> : 编&#x2F;解码</li>
+<li><strong>libavfilter</strong> : 帧级操作（如添加滤镜）</li>
+<li><strong>libavformat</strong> : 文件 I&#x2F;O 和 封装&#x2F;解封装</li>
+<li><strong>libavdevice</strong> : 设备视频文件的封装&#x2F;解封装</li>
+<li><strong>libavutil</strong> : 通用工具集合</li>
+<li><strong>libswresample</strong> : 音频重采样、格式处理、混音等</li>
+<li><strong>libpostproc</strong> : 预处理</li>
+<li><strong>libswscale</strong> : 色彩处理和缩放</li>
+</ul>
+<h2 id="ffmpeg-库在-Windows-下的安装"><a href="#ffmpeg-库在-Windows-下的安装" class="headerlink" title="ffmpeg 库在 Windows 下的安装"></a>ffmpeg 库在 Windows 下的安装</h2><p>这个项目大部分是在 Linux 开发板上做的，Windows 上占一小部分。虽然如此，在 Windows 上安装 ffmpeg 的步骤一点都没法省。</p>
+<p>ffmpeg 目前不提供预编译的库文件，而是需要自己下载源码并编译。看网上说 Windows 下编译 ffmpeg 非常麻烦，我想应该是“找到好用的教程”比较麻烦。本文使用 MSYS2 来编译 ffmpeg ，许多问题可以迎刃而解！</p>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>在 Windows 下，编译需要做的准备如下：</p>
+<ul>
+<li>安装并配置 MYSY2</li>
+<li>安装 git （可选）</li>
+<li>ffmpeg 源码</li>
+<li>x264 源码（可选）</li>
+</ul>
+<p>本节只讲述 MSYS2 的安装和配置和源码的下载。git 可根据需要自行选择安装。</p>
+<h4 id="安装-MSYS2-及编译工具链"><a href="#安装-MSYS2-及编译工具链" class="headerlink" title="安装 MSYS2 及编译工具链"></a>安装 MSYS2 及编译工具链</h4><p>MSYS2 是 Windows 下的一组编译套件，它可以在 Windows 系统中模拟 Linux 下的编译环境，如使用 shell 运行命令、使用 pacman 安装软件包、使用 gcc (MinGW) 编译代码等。简单来说，使用 MSYS2 ，你可以通过在 Linux 下非常熟悉的各种命令，来编译 Windows 下的软件。</p>
+<blockquote>
+<p>官网描述：It provides a native build environment, based on open source software, and makes you feel right at home when you are already comfortable with Linux.</p>
+</blockquote>
+<p>MSYS2 的安装也非常省心，只需要到 <a target="_blank" rel="noopener" href="https://www.msys2.org/">MSYS2 官网</a> 下载<code>.exe</code>安装包，管理员身份运行安装即可。</p>
+<p>注意安装盘必须是NTFS，路径要全使用 ACSII 字符，不能有空格。建议就安装在默认位置，如果不想装在 C 盘，就直接改下盘符，装在其他盘的根目录。</p>
+<p>安装完毕后，开始菜单里就会有下面的程序：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-20-12-42.png" alt="2022-12-08-20-12-42"></p>
+<p>点击它们就会启动一个 shell 窗口，Just like on Linux ! 这个 shell 程序默认是 Mintty，类似 Linux 系统中的 bash shell。MSYS2 支持多个编译器工具链，它们的环境是独立的（可以去安装文件夹查看），这里选择启动 MINGW64 （如果你也是64位系统的话）。</p>
+<p>首先为了提高下载速度，将下载源换成中科大的：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&quot;s#mirror.msys2.org/#mirrors.ustc.edu.cn/msys2/#g&quot;</span> /etc/pacman.d/mirrorlist*</span><br><span class="line">pacman -Sy</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-11-11-13.png" alt="2022-12-09-11-11-13"></p>
+<p>然后安装mingw64编译链和基本的依赖：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pacman -S mingw-w64-x86_64-toolchain  <span class="comment"># mingw64编译工具链，win下的gcc</span></span><br><span class="line">pacman -S base-devel    <span class="comment"># 一些基本的编译工具</span></span><br><span class="line">pacman -S yasm nasm     <span class="comment"># 汇编器</span></span><br></pre></td></tr></table></figure>
+
+<p>安装完毕后，可以输入<code>gcc -v</code>查看 gcc 版本：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-11-16-46.png" alt="2022-12-09-11-16-46"></p>
+<!-- > 有文章提到需要将 mingw64 的路径加入环境变量。实际上如果全程使用 MSYS2 的 shell 来编译的话，是不需要这一操作的。需要加入环境变量的是最终编译完成后， ffmpeg 的库文件所在路径，这个问题后文会详述。 -->
+
+<p>最后需要添加环境变量。右击此电脑 -&gt; 属性 -&gt; 高级系统设置 -&gt; 环境变量 -&gt; 选择 <code>Path</code> （用户变量和系统变量都要）-&gt; 编辑 -&gt; 新建，添加编译工具链的路径：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-11-07-29.png" alt="2022-12-09-11-07-29"></p>
+<p>注意如果 MSYS2 没有安装在 C 盘，或者使用的不是 MINGW64 的shell，那么这里需要改成对应的路径。</p>
+<blockquote>
+<p>添加环境变量这一步，是为了以后使用其他编辑器或者IDE时，能够找到 MINGW64 的编译工具链。在 MSYS2 中编译 ffmpeg 本身是不需要添加 Windows 的环境变量的。</p>
+</blockquote>
+<h4 id="ffmpeg-源码下载"><a href="#ffmpeg-源码下载" class="headerlink" title="ffmpeg 源码下载"></a>ffmpeg 源码下载</h4><p>在 <a target="_blank" rel="noopener" href="https://ffmpeg.org/">ffmpeg 官网</a> 下载源码，目前最新的版本是 5.1.2 。注意不要下载成 executable files 了，那个是可以直接运行的 CLI 程序。</p>
+<blockquote>
+<p>你也可以直接下载 snapshot 版本，不过我个人更愿意下载带版本数字的。试想两年之后，谁能知道你电脑里的 snapshot 是何年何月的 snapshot 呢？</p>
+</blockquote>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-15-10-59.png" alt="2022-12-08-15-10-59"></p>
+<p>三个 download 都可以，只是压缩包格式不一样：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-08-15-11-31.png" alt="2022-12-08-15-11-31"></p>
+<p>下载后解压到一个好找的文件夹即可。</p>
+<h4 id="x264-源码下载"><a href="#x264-源码下载" class="headerlink" title="x264 源码下载"></a>x264 源码下载</h4><p>ffmpeg 提供了相当多的外部库支持，但是如果要使用的话需要自己编译外部库。因为项目需要用到视频编码，所以此处加入 x264 库。</p>
+<blockquote>
+<p>libx264 由 VideoLAN 组织所发布，它是 H.264 的一套性能较好的软编码器实现（不包括解码器）。H.264 (AVC) 是当前较常用的视频编码，目前 H.264 的继任者 H.265 (HEVC) 也渐趋成熟， VideoLAN 也有一套实现 libx265 。不过 libx265 的编译方式与 libx264 有所区别，目前我还没仔细研究。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.videolan.org/developers/x264.html">戳这里访问 x264 的官方页面</a></p>
+<p>官方建议使用 git 下载源码（下载压缩包再解压应该也是一样的）：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://code.videolan.org/videolan/x264.git</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译和安装"><a href="#编译和安装" class="headerlink" title="编译和安装"></a>编译和安装</h3><p>将所有源码放到同一文件夹下便于管理，我把它们都统一放在一个叫 ffmpeg 的文件夹下。然后再建立各自的 install 文件夹存储编译好的库（当然你也可以选择其他任何地方的文件夹）。</p>
+<p>为了方便，将编译的命令写成脚本 <code>build-x264.sh</code> 和 <code>build-ffmpeg.sh</code>。当前文件夹的结构如下（源码文件夹名称被我修改过了）：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-12-07-39.png" alt="2022-12-09-12-07-39"></p>
+<h4 id="编译-x264-库"><a href="#编译-x264-库" class="headerlink" title="编译 x264 库"></a>编译 x264 库</h4><p><code>build-x264.sh</code>脚本内容如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line">basepath=$(<span class="built_in">cd</span> `<span class="built_in">dirname</span> <span class="variable">$0</span>`;<span class="built_in">pwd</span>)</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$&#123;basepath&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;basepath&#125;</span>/x264-src   <span class="comment"># 根据路径名称自行修改</span></span><br><span class="line"><span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line">./configure --prefix=<span class="variable">$&#123;basepath&#125;</span>/x264_install --enable-shared</span><br><span class="line">make -j8</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>注意第一行必须是 <code>#!/bin/sh</code> ，才能被 MSYS2 的 shell 识别为可执行脚本。（亲测在 MSYS2 中<code>chmod</code>命令没有效果）</p>
+<p>这几条命令中最重要的就是<code>./configure</code>命令，它的参数会指导编译器应该如何编译代码。这里 <code>--prefix</code> 参数指定了编译好的库文件的安装路径，可以自己任意指定。 <code>--enable-shared</code> 代表编译动态库。如果你需要静态库，那么需要加入 <code>-enable-static</code> 参数。</p>
+<p>此外，make 命令的<code>-j</code>参数是指并行编译的线程数，可以根据你的 CPU 核数自行确定。</p>
+<blockquote>
+<p>可以在源码文件夹下，通过 <code>./configure --help</code> 命令查看所有可选参数。</p>
+</blockquote>
+<p>在 MSYS2 的 shell 中，打开源码所在文件夹，并执行脚本：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /d/repos/ffmpeg</span><br><span class="line">./build-x264.sh</span><br></pre></td></tr></table></figure>
+
+<p>注意 MSYS2 中文件路径的写法，是以<code>/d</code>代表 D 盘，类似 Linux 的风格。</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-15-20-27.png" alt="2022-12-09-15-20-27"></p>
+<p>不出意外的话，等待片刻后就会在 <code>x264_install</code> 路径下看到编译好的库。其中 <code>bin/libx264-164.dll</code> 文件就是x264的动态库文件。</p>
+<p>如果出现错误，可以先单独执行 <code>.\configure</code> 命令，然后再执行 <code>make</code> ，逐步查找错误原因。</p>
+<h4 id="编译-ffmpeg-库"><a href="#编译-ffmpeg-库" class="headerlink" title="编译 ffmpeg 库"></a>编译 ffmpeg 库</h4><p><code>build-ffmpeg.sh</code>脚本内容如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line">basepath=$(<span class="built_in">cd</span> `<span class="built_in">dirname</span> <span class="variable">$0</span>`;<span class="built_in">pwd</span>)</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$&#123;basepath&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;basepath&#125;</span>/ffmpeg-5.1.2-src</span><br><span class="line"><span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> PKG_CONFIG_PATH=<span class="variable">$&#123;PKG_CONFIG_PATH&#125;</span>:/d/repos/ffmpeg/x264_install/lib/pkgconfig</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$&#123;PKG_CONFIG_PATH&#125;</span></span><br><span class="line"></span><br><span class="line">./configure --prefix=<span class="variable">$&#123;basepath&#125;</span>/ffmpeg_5.2.1_install \</span><br><span class="line">--enable-gpl --enable-libx264 --disable-static --enable-shared \</span><br><span class="line">--extra-cflags=-l<span class="variable">$&#123;basepath&#125;</span>/x264_install/include --extra-ldflags=-L<span class="variable">$&#123;basepath&#125;</span>/x264_install/lib</span><br><span class="line"></span><br><span class="line">make -j8</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>使用的命令与<code>libx264</code>类似，也是先 <code>configure</code> 再 <code>make</code> 。如果需要添加 x264 支持的话，需要注意以下几点：</p>
+<ul>
+<li>加入 <code>--enable-libx264</code> 参数</li>
+<li>指定 PKG_CONFIG_PATH 变量，告知编译器 x264 库的路径</li>
+<li>指定 x264 库的头文件包含路径及动态库链接的路径</li>
+</ul>
+<p>ffmpeg 可自定义的编译参数非常多，有需要可自行研究。</p>
+<p>然后同样也是执行脚本即可：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /d/repos/ffmpeg</span><br><span class="line">./build-ffmpeg.sh</span><br></pre></td></tr></table></figure>
+
+<p>ffmpeg 代码量较大，可能会编译比较久，多线程 make 可加快编译速度。我使用<code>make -j8</code>大约花了七八分钟。</p>
+<p>编译完成后，就可以在 ffmpeg_5.2.1_install 路径下看到库文件了。其中 bin 下的一堆 dll 就是动态库文件。</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-15-33-12.png" alt="2022-12-09-15-33-12"></p>
+<p>现在 ffmpeg 的 SDK 就任你调用了！下一节我们来试试调用 ffmpeg 编写程序。</p>
+<h2 id="ffmpeg-的-Hello-World-程序"><a href="#ffmpeg-的-Hello-World-程序" class="headerlink" title="ffmpeg 的 Hello World 程序"></a>ffmpeg 的 Hello World 程序</h2><p>在 ffmpeg 安装路径下，打开 share\ffmpeg\examples ，可以看到 ffmpeg 的示例程序，它们也可以在 <a target="_blank" rel="noopener" href="https://ffmpeg.org/doxygen/trunk/examples.html">ffmpeg 的在线 API 文档</a> 中查看到。</p>
+<p>其中的 <code>avio_reading.c</code> 相当于 ffmpeg 的 Hello World，它会读取一个媒体文件的元数据信息并打印显示。</p>
+<p>另外建一个文件夹，将<code>avio_reading.c</code>复制过去，然后用在 MYSY2 中打开这个目录，使用 gcc 命令编译。</p>
+<p>gcc命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gcc avio_reading.c -o <span class="built_in">test</span> \</span><br><span class="line">-I<span class="string">&quot;D:/repos/ffmpeg/ffmpeg_5.2.1_install/include/&quot;</span> \</span><br><span class="line">-L<span class="string">&quot;D:/repos/ffmpeg/ffmpeg_5.2.1_install/bin/&quot;</span> \</span><br><span class="line">-lavcodec -lavformat -lavutil</span><br></pre></td></tr></table></figure>
+
+<p>编译完毕后，将在当前文件夹下生成可执行文件<code>test.exe</code>。</p>
+<p>注意在 shell 中运行程序之前，需要将两个库的安装目录添加到环境变量 PATH （这是MSYS2 的环境变量，不是 Windows 系统的）。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/d/repos/ffmpeg/x264_install/bin:/d/repos/ffmpeg/ffmpeg_5.2.1_install/bin</span><br></pre></td></tr></table></figure>
+
+<p>如果不执行export命令的话，那么运行<code>test.exe</code>时就无法链接到动态库，更令人困扰的是不会弹出任何提示，所以一定记得添加。当然如果你觉得每次打开都要运行太麻烦，也可以将这条命令添加到 <code>你的安装位置/msys64/etc/profile</code> 文件的末尾，这个文件和 Linux 下的<code>/etc/profile</code>文件作用是类似的。</p>
+<p>运行测试效果如下：</p>
+<p><img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-17-21-35.png" alt="2022-12-09-17-21-35"></p>
+<p>至此，我们迈出了使用 ffmpeg 库的第一步——也是一大步！</p>
+<blockquote>
+<p>由于 gcc 的编译命令很长，重复手打很不方便，所以我一般会使用 vscode+cmake 的方式来做开发。不过这个配置又是较为麻烦的一件事，限于篇幅本文不再详述，感兴趣的读者可自行查阅资料。基本上只要注意把 gcc 的命令参数转换到 CmakeLists.txt 文件里，并注意终端的环境变量配置即可。</p>
+</blockquote>
+<h2 id="入门资料"><a href="#入门资料" class="headerlink" title="入门资料"></a>入门资料</h2><p>ffmpeg 我也是最近才开始用，官方对 SDK 没有详细的入门教程，仅提供了 Doxygen 风格的 API 文档供查询。所以这里贴两个我觉得很好的入门帖，供与我一样刚刚入门的朋友参考。</p>
+<p>首先是 Github 上的一篇tutorial：<a target="_blank" rel="noopener" href="https://github.com/leandromoreira/ffmpeg-libav-tutorial">ffmpeg-libav-tutorial</a> ，篇幅不长，读完可以对音视频有一个基本的认知。</p>
+<p>然后是已故的音视频领域先驱<a target="_blank" rel="noopener" href="https://blog.csdn.net/leixiaohua1020/article/details/15811977">雷霄骅（雷神）的博客</a> 。需要注意的是现在的 ffmpeg 相比雷神当年使用的版本已经有了许多变化，使用雷神的源代码有时还需要修改。（斯人已逝，生者如斯！）</p>
+<p>其他较为系统的参考资料我还没有找到，基本就是根据需要去百度or谷歌。有时 ffmpeg 官网也能派上一些用场，可以多翻翻。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>MSYS2 真是个好东西！</p>
+<p>下一篇将讨论 ffmpeg 在 Linux 上的安装以及交叉编译的问题。</p>
+<img src="https://midoq-image-host.oss-cn-hangzhou.aliyuncs.com/images/2022-12-09-18-23-40.png" width=50%>
+
+<blockquote>
+<p>参考资料：<br><a target="_blank" rel="noopener" href="https://mirrors.ustc.edu.cn/help/msys2.html">MSYS2中科大镜像源帮助</a><br><a target="_blank" rel="noopener" href="http://events.jianshu.io/p/53ecc4dbe7d0">FFmpeg编译无坑版（Windows篇）</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91/" rel="tag"># 音视频</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/30/Ubuntu20-04%E6%9B%B4%E6%8D%A2%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F%E6%BA%90/" rel="prev" title="Ubuntu20.04更换国内镜像源（阿里、网易163、清华、中科大）">
+      <i class="fa fa-chevron-left"></i> Ubuntu20.04更换国内镜像源（阿里、网易163、清华、中科大）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/29/C-%E4%B8%ADstring%E7%B1%BB-C%E9%A3%8E%E6%A0%BC%E5%AD%97%E7%AC%A6%E4%B8%B2-%E6%95%B4%E6%95%B0%E7%B1%BB%E5%9E%8B%E7%9A%84%E8%BD%AC%E6%8D%A2%E6%96%B9%E6%B3%95%E4%B8%80%E8%A7%88/" rel="next" title="C++中string类/C风格字符串/整数类型的转换方法一览">
+      C++中string类/C风格字符串/整数类型的转换方法一览 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ffmpeg-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">ffmpeg 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ffmpeg-%E5%BA%93%E5%9C%A8-Windows-%E4%B8%8B%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">ffmpeg 库在 Windows 下的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">2.1.</span> <span class="nav-text">环境准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-MSYS2-%E5%8F%8A%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7%E9%93%BE"><span class="nav-number">2.1.1.</span> <span class="nav-text">安装 MSYS2 及编译工具链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ffmpeg-%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.1.2.</span> <span class="nav-text">ffmpeg 源码下载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#x264-%E6%BA%90%E7%A0%81%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.1.3.</span> <span class="nav-text">x264 源码下载</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%92%8C%E5%AE%89%E8%A3%85"><span class="nav-number">2.2.</span> <span class="nav-text">编译和安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91-x264-%E5%BA%93"><span class="nav-number">2.2.1.</span> <span class="nav-text">编译 x264 库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91-ffmpeg-%E5%BA%93"><span class="nav-number">2.2.2.</span> <span class="nav-text">编译 ffmpeg 库</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ffmpeg-%E7%9A%84-Hello-World-%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">ffmpeg 的 Hello World 程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A5%E9%97%A8%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">入门资料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">5.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MidoQ"
+      src="/images/avatar-qmf.png">
+  <p class="site-author-name" itemprop="name">MidoQ</p>
+  <div class="site-description" itemprop="description">钱缪峰的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MidoQ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MidoQ" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:qmfeng@seu.edu.cn" title="E-Mail → mailto:qmfeng@seu.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MidoQ</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'pHkGJsNXBe2ezFAKXvqJPDqz-gzGzoHsz',
+      appKey     : 'QbnOPXmD1ULkk3AYPktpOCvD',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

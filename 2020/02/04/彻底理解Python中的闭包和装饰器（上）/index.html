@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-qmf.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-qmf.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-qmf.png">
+  <link rel="mask-icon" href="/images/logo-qmf.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"midoq.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"buttons","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="这是我的第3篇博客。 终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。 本篇首先讲闭包。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="彻底理解Python中的闭包和装饰器（上）">
+<meta property="og:url" content="https://midoq.github.io/2020/02/04/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8A%EF%BC%89/index.html">
+<meta property="og:site_name" content="TARDIS">
+<meta property="og:description" content="这是我的第3篇博客。 终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。 本篇首先讲闭包。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-04T09:41:43.000Z">
+<meta property="article:modified_time" content="2021-01-27T12:51:54.000Z">
+<meta property="article:author" content="MidoQ">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="编程语言">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://midoq.github.io/2020/02/04/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8A%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>彻底理解Python中的闭包和装饰器（上） | TARDIS</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">TARDIS</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">知识时光机</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>博客首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签集合</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>文章分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间线旅行</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://midoq.github.io/2020/02/04/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8A%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar-qmf.png">
+      <meta itemprop="name" content="MidoQ">
+      <meta itemprop="description" content="钱缪峰的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TARDIS">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          彻底理解Python中的闭包和装饰器（上）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-04 17:41:43" itemprop="dateCreated datePublished" datetime="2020-02-04T17:41:43+08:00">2020-02-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/02/04/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8A%EF%BC%89/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/04/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8A%EF%BC%89/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这是我的第<b>3</b>篇博客。</p>
+<p>终于开始学Python了。作为原生C++选手，表示Python的特性真是让人觉得既简单易用又捉摸不透。接下来两篇博客总结一下花了好久理解的闭包和装饰器特性。</p>
+<p>本篇首先讲闭包。</p>
+<span id="more"></span>
+
+
+<h2 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h2><p>闭包（Closure）其实并不是Python独有的特性，很多语言都有对闭包的支持。（当然，因为Python是笔者除C&#x2F;C++之外学习的第二门语言，所以也是第一次遇到闭包。）简而言之，闭包实际上就是——函数中定义的函数。</p>
+<p>这种程序结构的主要作用是：使得函数中的局部变量可以常驻内存，即使在函数返回之后（函数生命期结束后）。在这个意义上它的作用与C++中的static静态变量类似，当然不完全相同。</p>
+<h2 id="Python中闭包的定义和使用"><a href="#Python中闭包的定义和使用" class="headerlink" title="Python中闭包的定义和使用"></a>Python中闭包的定义和使用</h2><p>在Python中，一个典型的闭包可以这样定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">arg</span>):</span><br><span class="line">	temp = <span class="number">10</span></span><br><span class="line">	<span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">		_<span class="built_in">sum</span> = temp + arg	<span class="comment"># 内函数引用了外函数的局部变量</span></span><br><span class="line">		<span class="built_in">print</span>(<span class="string">&#x27;_sum =&#x27;</span>, _<span class="built_in">sum</span>)</span><br><span class="line">		<span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line">	<span class="keyword">return</span> inner	<span class="comment"># 外函数返回了内函数的引用</span></span><br></pre></td></tr></table></figure>
+
+<p>在这里有两个嵌套的函数，不妨叫他们外函数和内函数。可以看到闭包有两个显著的特点：</p>
+<ol>
+<li>内函数引用了外函数的局部变量。</li>
+<li>外函数返回了内函数的引用（函数名）。</li>
+</ol>
+<p>符合以上两点，Python解释器会认为这是一个闭包。这时如果外函数的生命期结束了，在外函数中创建的局部变量并不会像通常一样被销毁，而是会留在内存中。这样当下次调用内函数时，就能够继续使用这些局部变量。</p>
+<p>通过下面的分析可以看到，调用内函数正是通过外函数返回的函数指针（Python中没有指针变量，出于C++习惯笔者认为把它称作指针比较易于理解，没有学过C&#x2F;C++的读者理解成返回了内函数的地址即可）。</p>
+<h3 id="闭包代码分析"><a href="#闭包代码分析" class="headerlink" title="闭包代码分析"></a>闭包代码分析</h3><p>我们来仔细分析上面的代码。</p>
+<p>如果读者有C&#x2F;C++经验，那么理解起来将会轻松许多。C++严格的语法要求函数必须先定义再调用，在Python并没有不同。因此需要牢记一点：在代码段中，函数的定义是不会被执行的，在理解代码时def下的所有内容都先跳过，到调用函数时再回来看它。</p>
+<p>按照这种阅读顺序，在外函数outer()中实际上只做了三件事情：</p>
+<ol>
+<li>定义局部变量temp</li>
+<li>定义内函数inner()</li>
+<li>返回内函数inner，实际上是返回了内函数的指针。</li>
+</ol>
+<p>调用这个闭包时，首先用一个变量保存函数对象（的指针）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f = outer(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>执行这句话时，就完成了上面所说的1~3条，f实际上是outer()返回的inner()的指针。注意，第2条只做了函数的定义，第3条只返回了函数的引用。完成这两件事的时候，实际上都还没有执行内函数inner()。所以执行这句代码后的输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+
+<p>对，啥都没有。因为任何shell中进行输出的语句还没有被执行。这是透彻理解闭包非常重要的一点。忽略这一点很容易造成所谓的“闭包陷阱”。</p>
+<p>那么如何调用内函数呢？就要用刚刚用来保存函数指针的变量f：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br></pre></td></tr></table></figure>
+
+<p>上面的两句代码，实际上通过函数指针f执行了内函数inner()。执行上面的所有代码，输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_sum = 12</span><br><span class="line">x = 12</span><br></pre></td></tr></table></figure>
+
+<p>再次强调：</p>
+<blockquote>
+<p>直到使用函数指针调用内函数，内函数才会被执行。</p>
+</blockquote>
+<p>需要说明，虽然在闭包中定义的局部变量常驻内存中，但在闭包外这些变量仍然是不可访问的。如上面的temp变量，只有通过函数指针f才可以访问，在函数外引用该变量会报错变量不存在。这与C++中的静态变量相同，即生命期比局部变量长，但可见性与局部变量相同。</p>
+<h3 id="修改闭包的局部变量"><a href="#修改闭包的局部变量" class="headerlink" title="修改闭包的局部变量"></a>修改闭包的局部变量</h3><p>外函数中的局部变量虽然在内函数中可以引用（使用），但不能够重新赋值。</p>
+<p>执行如下闭包函数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">arg</span>):</span><br><span class="line">    temp = <span class="number">10</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        _<span class="built_in">sum</span> = temp + arg</span><br><span class="line">        temp += <span class="number">1</span>	<span class="comment">#在内函数中尝试改变temp的值</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;_sum = &#x27;</span>, _<span class="built_in">sum</span>)</span><br><span class="line">        <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> inner</span><br></pre></td></tr></table></figure>
+
+<p>会报如下错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UnboundLocalError: local variable &#x27;temp&#x27; referenced before assignment</span><br></pre></td></tr></table></figure>
+
+<p>这意味着对于内函数来说，外函数中的局部变量只是一个可以使用的常量，它不能被修改。如果在内函数中重新定义一个同名变量，那么它会屏蔽掉外函数中的变量，即优先使用“更局部”的变量。</p>
+<p>这实际上是由Python本身的语法特性造成的。在Python中，一个函数可以任意读取全局数据，但要修改时必须符合如下条件之一：</p>
+<ol>
+<li>全局变量使用global声明</li>
+<li>全局变量是可变类型数据</li>
+</ol>
+<p>在闭包中这一点是类似的。如果想要修改外函数中的变量，可以使用以下两种方法之一：</p>
+<ol>
+<li>使用nonlocal声明变量</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">arg</span>):</span><br><span class="line">    temp = <span class="number">10</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="keyword">nonlocal</span>  temp	<span class="comment">#用nonlocal声明变量，表示要到上一层变量空间寻找该变量</span></span><br><span class="line">        _<span class="built_in">sum</span> = temp + arg</span><br><span class="line">        temp += <span class="number">1</span>	<span class="comment">#此处修改temp的值，不会报错</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;_sum = &#x27;</span>, _<span class="built_in">sum</span>)</span><br><span class="line">        <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> inner</span><br><span class="line"></span><br><span class="line">f = outer(<span class="number">2</span>)</span><br><span class="line">x = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br><span class="line">x = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br></pre></td></tr></table></figure>
+
+<p>代码执行输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_sum =  12</span><br><span class="line">x =  12</span><br><span class="line">_sum =  13</span><br><span class="line">x =  13</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>将变量改为可变类型数据，如list</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>(<span class="params">arg</span>):</span><br><span class="line">    temp = [<span class="number">10</span>]</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>():</span><br><span class="line">        <span class="comment"># nonlocal  temp</span></span><br><span class="line">        _<span class="built_in">sum</span> = temp[<span class="number">0</span>] + arg</span><br><span class="line">        temp[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;_sum = &#x27;</span>, _<span class="built_in">sum</span>)</span><br><span class="line">        <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> inner</span><br><span class="line"></span><br><span class="line">f = outer(<span class="number">2</span>)</span><br><span class="line">x = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br><span class="line">x = f()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br></pre></td></tr></table></figure>
+
+<p>输出结果相同。</p>
+<p>从以上代码也可以看出，闭包中常驻内存的局部变量只有一份。当重复调用内函数时，访问的是同一处变量。</p>
+<h3 id="闭包的参数"><a href="#闭包的参数" class="headerlink" title="闭包的参数"></a>闭包的参数</h3><p>闭包的外函数和内函数都是函数，因此都可以接受参数，区别只在于参数是创建函数指针时传入，还是实际调用内函数时传入。</p>
+<p>如果在创建函数指针时传入，那么该参数在之后的调用中都会保持原值。以本文最开始的闭包代码为例，传给外函数的参数arg，与在外函数中定义的局部变量temp地位是完全相同的。</p>
+<p>相应地，传给内函数的参数则可以在每次调用的时候都不一样。执行如下代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">outer</span>():</span><br><span class="line">    temp = <span class="number">10</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inner</span>(<span class="params">arg</span>):</span><br><span class="line">        _<span class="built_in">sum</span> = temp + arg</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;_sum = &#x27;</span>, _<span class="built_in">sum</span>)</span><br><span class="line">        <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> inner</span><br><span class="line"></span><br><span class="line">f = outer()</span><br><span class="line">x = f(<span class="number">2</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br><span class="line">x = f(<span class="number">5</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x = &#x27;</span>, x)</span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_sum =  12</span><br><span class="line">x =  12</span><br><span class="line">_sum =  15</span><br><span class="line">x =  15</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="闭包陷阱"><a href="#闭包陷阱" class="headerlink" title="闭包陷阱"></a>闭包陷阱</h2><p>引用廖雪峰教程中的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">count</span>():</span><br><span class="line">    fs = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">4</span>):</span><br><span class="line">        <span class="keyword">def</span> <span class="title function_">func</span>():</span><br><span class="line">             <span class="keyword">return</span> i*i</span><br><span class="line">        fs.append(func)</span><br><span class="line">    <span class="keyword">return</span> fs</span><br><span class="line"></span><br><span class="line">f1, f2, f3 = count()</span><br><span class="line"><span class="built_in">print</span>(f1())</span><br><span class="line"><span class="built_in">print</span>(f2())</span><br><span class="line"><span class="built_in">print</span>(f3())</span><br></pre></td></tr></table></figure>
+
+<p>上面的闭包创建了一个函数的list，并将这个list返回。这样会造成闭包陷阱，编写者也许原来希望返回的是1、2、3的平方值，但实际上执行的结果是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">9</span><br><span class="line">9</span><br><span class="line">9</span><br></pre></td></tr></table></figure>
+
+<p>原因就是之前强调的，内函数的指针被创建时，它实际上还没有被执行。</p>
+<p>在上面内函数的循环中，每次循环只做了一件事，创建一个函数func()的指针并放入list。当真正调用三个内函数时，局部变量i已经变成3了，因此三个函数的返回值都是3。</p>
+<p>使用闭包时必须牢记：</p>
+<p><b>不要返回任何循环变量，或者后续会发生变化的变量。</b></p>
+<p>如果一定要引用循环变量怎么办？这时候只能再嵌套一个函数并立即执行它，将函数参数绑定到循环变量的当前值。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">count</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">j</span>):</span><br><span class="line">        <span class="keyword">def</span> <span class="title function_">g</span>():</span><br><span class="line">            <span class="keyword">return</span> j*j</span><br><span class="line">        <span class="keyword">return</span> g</span><br><span class="line">    fs = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">4</span>):</span><br><span class="line">        fs.append(f(i)) <span class="comment"># f(i)立刻被执行，因此i的当前值被传入f()</span></span><br><span class="line">    <span class="keyword">return</span> fs</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码实际上是两层嵌套的闭包。每次循环里，都使用当前的循环变量i立即调用了函数f(i)，它的意义是创建了函数指针并放入list。具体来说，是调用内层闭包的外函数，返回内层闭包的内函数指针。</p>
+<p>当各个函数指针被创建时，已经将当前循环变量传入闭包。对于后续的操作来说，每一个内层闭包拥有独立且不变的局部变量。当外层闭包返回函数list时，也就避免了闭包陷阱。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ol>
+<li>闭包的两个特征：内函数引用外函数的局部变量，外函数返回内函数的指针。</li>
+<li>外函数指针被创建时，内函数未被执行，直到使用函数指针调用内函数才会被执行。</li>
+<li>使用闭包时，不要返回任何循环变量或后续会发生变化的变量。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" rel="tag"># 编程语言</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/21/HTML%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="HTML学习笔记">
+      <i class="fa fa-chevron-left"></i> HTML学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/05/%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3Python%E4%B8%AD%E7%9A%84%E9%97%AD%E5%8C%85%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%EF%BC%88%E4%B8%8B%EF%BC%89/" rel="next" title="彻底理解Python中的闭包和装饰器（下）">
+      彻底理解Python中的闭包和装饰器（下） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%97%AD%E5%8C%85"><span class="nav-number">1.</span> <span class="nav-text">什么是闭包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python%E4%B8%AD%E9%97%AD%E5%8C%85%E7%9A%84%E5%AE%9A%E4%B9%89%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">Python中闭包的定义和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">闭包代码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%97%AD%E5%8C%85%E7%9A%84%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F"><span class="nav-number">2.2.</span> <span class="nav-text">修改闭包的局部变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">闭包的参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E9%99%B7%E9%98%B1"><span class="nav-number">3.</span> <span class="nav-text">闭包陷阱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MidoQ"
+      src="/images/avatar-qmf.png">
+  <p class="site-author-name" itemprop="name">MidoQ</p>
+  <div class="site-description" itemprop="description">钱缪峰的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MidoQ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MidoQ" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:qmfeng@seu.edu.cn" title="E-Mail → mailto:qmfeng@seu.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MidoQ</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'pHkGJsNXBe2ezFAKXvqJPDqz-gzGzoHsz',
+      appKey     : 'QbnOPXmD1ULkk3AYPktpOCvD',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
